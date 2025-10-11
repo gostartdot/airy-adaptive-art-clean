@@ -1,9 +1,8 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { authService } from '../services/authService';
-
-import { useAuth } from '../store/useAuthStore';
-import { INTERESTS_OPTIONS, CITIES } from '../utils/constants';
+import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { authService } from "../services/authService";
+import { useAuth } from "../store/useAuthStore";
+import { INTERESTS_OPTIONS, CITIES } from "../utils/constants";
 
 interface OnboardingData {
   googleId: string;
@@ -28,158 +27,219 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  
+
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<OnboardingData>({
-    googleId: location.state?.googleId || '',
-    email: location.state?.email || '',
-    name: location.state?.name || '',
-    dateOfBirth: '',
-    gender: '',
-    genderCustom: '',
+    googleId: location.state?.googleId || "",
+    email: location.state?.email || "",
+    name: location.state?.name || "",
+    dateOfBirth: "",
+    gender: "",
+    genderCustom: "",
     showGender: true,
-    city: '',
+    city: "",
     photos: [],
-    bio: '',
+    bio: "",
     interests: [],
     preferences: {
       showMe: [],
       ageRange: { min: 22, max: 30 },
-      maxDistance: 20
-    }
+      maxDistance: 20,
+    },
   });
 
-  // Step 1: Basic Information
   const renderStep1 = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Let's start with the basics</h2>
-        <p className="text-gray-600">Step 1 of 5</p>
+        <h2 className="text-3xl font-bold text-white mb-2">
+          Let's start with the basics
+        </h2>
+        <p className="text-white/60">Step 1 of 5</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">What's your first name?</label>
+        <label className="block text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
+          What's your first name?
+        </label>
         <input
           type="text"
           value={formData.name}
-          onChange={(e) => setFormData({...formData, name: e.target.value})}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           placeholder="Enter your name"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full px-4 py-3.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-white/50 outline-none"
         />
-        <p className="text-xs text-gray-500 mt-1">This will be shown on your profile</p>
+        <p className="text-xs text-white/50 mt-2">
+          This will be shown on your profile
+        </p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">When's your birthday?</label>
+        <label className="block text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
+          When's your birthday?
+        </label>
         <input
           type="date"
           value={formData.dateOfBirth}
-          onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
-          max={new Date().toISOString().split('T')[0]}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          onChange={(e) =>
+            setFormData({ ...formData, dateOfBirth: e.target.value })
+          }
+          max={new Date().toISOString().split("T")[0]}
+          className="w-full px-4 py-3.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white outline-none"
         />
-        <p className="text-xs text-gray-500 mt-1">You must be 18 or older</p>
+        <p className="text-xs text-white/50 mt-2">You must be 18 or older</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">What's your gender?</label>
+        <label className="block text-sm font-semibold text-white/80 mb-3 uppercase tracking-wide">
+          What's your gender?
+        </label>
         <div className="space-y-2">
-          {['woman', 'man', 'non-binary', 'other'].map((g) => (
-            <label key={g} className="flex items-center">
+          {["woman", "man", "non-binary", "other"].map((g) => (
+            <label
+              key={g}
+              className="flex items-center bg-white/5 backdrop-blur-sm p-3 rounded-xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
+            >
               <input
                 type="radio"
                 name="gender"
                 value={g}
                 checked={formData.gender === g}
-                onChange={(e) => setFormData({...formData, gender: e.target.value})}
-                className="mr-2"
+                onChange={(e) =>
+                  setFormData({ ...formData, gender: e.target.value })
+                }
+                className="mr-3 w-4 h-4 text-purple-500"
               />
-              <span className="capitalize">{g}</span>
+              <span className="capitalize text-white">{g}</span>
             </label>
           ))}
         </div>
-        {formData.gender === 'other' && (
+        {formData.gender === "other" && (
           <input
             type="text"
             value={formData.genderCustom}
-            onChange={(e) => setFormData({...formData, genderCustom: e.target.value})}
+            onChange={(e) =>
+              setFormData({ ...formData, genderCustom: e.target.value })
+            }
             placeholder="Please specify"
-            className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg"
+            className="w-full mt-3 px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white placeholder-white/50 outline-none"
           />
         )}
-        <label className="flex items-center mt-3">
+        <label className="flex items-center mt-4 bg-white/5 p-3 rounded-xl cursor-pointer hover:bg-white/10 transition">
           <input
             type="checkbox"
             checked={formData.showGender}
-            onChange={(e) => setFormData({...formData, showGender: e.target.checked})}
-            className="mr-2"
+            onChange={(e) =>
+              setFormData({ ...formData, showGender: e.target.checked })
+            }
+            className="mr-3 w-4 h-4 text-purple-500"
           />
-          <span className="text-sm">Show gender on my profile</span>
+          <span className="text-sm text-white">Show gender on my profile</span>
         </label>
       </div>
     </div>
   );
 
-  // Step 2: Location
   const renderStep2 = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Where are you located?</h2>
-        <p className="text-gray-600">Step 2 of 5</p>
+        <h2 className="text-3xl font-bold text-white mb-2">
+          Where are you located?
+        </h2>
+        <p className="text-white/60">Step 2 of 5</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Which city do you live in?</label>
+        <label className="block text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
+          Which city do you live in?
+        </label>
         <select
           value={formData.city}
-          onChange={(e) => setFormData({...formData, city: e.target.value})}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+          className="w-full px-4 py-3.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white outline-none"
         >
-          <option value="">Select a city</option>
+          <option value="" className="bg-slate-800">
+            Select a city
+          </option>
           {CITIES.map((city) => (
-            <option key={city} value={city}>{city}</option>
+            <option key={city} value={city} className="bg-slate-800">
+              {city}
+            </option>
           ))}
         </select>
+        <p className="text-xs text-white/50 mt-2 flex items-center gap-2">
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+          We'll use this to find matches near you
+        </p>
       </div>
     </div>
   );
 
-  // Step 3: Photos
   const renderStep3 = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Add your photos</h2>
-        <p className="text-gray-600">Step 3 of 5</p>
-        <p className="text-sm text-gray-500 mt-1">Upload 2-4 photos (minimum 2 required)</p>
+        <h2 className="text-3xl font-bold text-white mb-2">Add your photos</h2>
+        <p className="text-white/60">Step 3 of 5</p>
+        <p className="text-sm text-white/50 mt-1">
+          Upload 2-4 photos (minimum 2 required)
+        </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
         {[0, 1, 2, 3].map((index) => (
-          <div key={index} className="aspect-[3/4] border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center relative overflow-hidden">
+          <div
+            key={index}
+            className="aspect-[3/4] border-2 border-dashed border-white/20 rounded-2xl flex items-center justify-center relative overflow-hidden bg-white/5 backdrop-blur-sm hover:border-white/40 transition"
+          >
             {formData.photos[index] ? (
               <>
-                <img src={formData.photos[index]} alt={`Photo ${index + 1}`} className="w-full h-full object-cover" />
+                <img
+                  src={formData.photos[index]}
+                  alt={`Photo ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
                 <button
                   onClick={() => {
                     const newPhotos = [...formData.photos];
                     newPhotos.splice(index, 1);
-                    setFormData({...formData, photos: newPhotos});
+                    setFormData({ ...formData, photos: newPhotos });
                   }}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
+                  className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition"
                 >
                   ×
                 </button>
                 {index === 0 && (
-                  <div className="absolute top-2 left-2 bg-purple-600 text-white text-xs px-2 py-1 rounded">
+                  <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
                     MAIN
                   </div>
                 )}
               </>
             ) : (
-              <label className="cursor-pointer flex flex-col items-center">
-                <span className="text-4xl text-gray-400">+</span>
-                <span className="text-xs text-gray-500 mt-2">Add Photo</span>
+              <label className="cursor-pointer flex flex-col items-center w-full h-full justify-center hover:bg-white/10 transition">
+                <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-2">
+                  <span className="text-2xl text-white">+</span>
+                </div>
+                <span className="text-xs text-white/70 font-medium">
+                  Add Photo
+                </span>
                 <input
                   type="file"
                   accept="image/*"
@@ -192,19 +252,37 @@ export default function Onboarding() {
         ))}
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-lg text-sm text-gray-700">
-        <p className="font-medium mb-2">Photo Guidelines:</p>
-        <ul className="space-y-1 text-xs">
-          <li>✓ Clear face photo (required)</li>
-          <li>✓ Recent photos (last 2 years)</li>
-          <li>🚫 No group photos as main picture</li>
-          <li>🚫 No heavily filtered photos</li>
+      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 p-4 rounded-2xl backdrop-blur-sm">
+        <p className="font-semibold mb-3 text-white flex items-center gap-2">
+          <span className="text-lg">📸</span>
+          Photo Guidelines
+        </p>
+        <ul className="space-y-2 text-sm text-white/80">
+          <li className="flex items-center gap-2">
+            <span className="text-green-400">✓</span>
+            Clear face photo (required)
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-green-400">✓</span>
+            Recent photos (last 2 years)
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-red-400">🚫</span>
+            No group photos as main picture
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-red-400">🚫</span>
+            No heavily filtered photos
+          </li>
         </ul>
       </div>
     </div>
   );
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+  const handlePhotoUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -213,34 +291,46 @@ export default function Onboarding() {
       const base64 = reader.result as string;
       const newPhotos = [...formData.photos];
       newPhotos[index] = base64;
-      setFormData({...formData, photos: newPhotos});
+      setFormData({ ...formData, photos: newPhotos });
     };
     reader.readAsDataURL(file);
   };
 
-  // Step 4: Bio & Interests
   const renderStep4 = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Tell us about yourself</h2>
-        <p className="text-gray-600">Step 4 of 5</p>
+        <h2 className="text-3xl font-bold text-white mb-2">
+          Tell us about yourself
+        </h2>
+        <p className="text-white/60">Step 4 of 5</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Write a short bio (optional)</label>
+        <label className="block text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
+          Write a short bio (optional)
+        </label>
         <textarea
           value={formData.bio}
-          onChange={(e) => setFormData({...formData, bio: e.target.value.slice(0, 150)})}
+          onChange={(e) =>
+            setFormData({ ...formData, bio: e.target.value.slice(0, 150) })
+          }
           placeholder="Tell matches about yourself..."
           rows={4}
           maxLength={150}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full px-4 py-3.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent text-white placeholder-white/50 outline-none resize-none"
         />
-        <p className="text-xs text-gray-500 text-right">{formData.bio.length}/150 characters</p>
+        <div className="flex justify-between items-center mt-2">
+          <p className="text-xs text-white/50">
+            Share your hobbies, passions, or what makes you unique
+          </p>
+          <p className="text-xs text-white/70 font-medium">
+            {formData.bio.length}/150
+          </p>
+        </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-semibold text-white/80 mb-3 uppercase tracking-wide">
           Select up to 5 interests ({formData.interests.length} of 5 selected)
         </label>
         <div className="flex flex-wrap gap-2">
@@ -249,16 +339,16 @@ export default function Onboarding() {
               key={interest}
               onClick={() => {
                 const newInterests = formData.interests.includes(interest)
-                  ? formData.interests.filter(i => i !== interest)
+                  ? formData.interests.filter((i) => i !== interest)
                   : formData.interests.length < 5
                   ? [...formData.interests, interest]
                   : formData.interests;
-                setFormData({...formData, interests: newInterests});
+                setFormData({ ...formData, interests: newInterests });
               }}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 formData.interests.includes(interest)
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                  : "bg-white/10 text-white/70 border border-white/20 hover:bg-white/20"
               }`}
             >
               {interest}
@@ -269,74 +359,109 @@ export default function Onboarding() {
     </div>
   );
 
-  // Step 5: Preferences
   const renderStep5 = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-slide-up">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Who would you like to meet?</h2>
-        <p className="text-gray-600">Step 5 of 5</p>
+        <h2 className="text-3xl font-bold text-white mb-2">
+          Who would you like to meet?
+        </h2>
+        <p className="text-white/60">Step 5 of 5</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">I'm interested in meeting:</label>
+        <label className="block text-sm font-semibold text-white/80 mb-3 uppercase tracking-wide">
+          I'm interested in meeting:
+        </label>
         <div className="space-y-2">
-          {['woman', 'man', 'non-binary'].map((pref) => (
-            <label key={pref} className="flex items-center">
+          {["woman", "man", "non-binary"].map((pref) => (
+            <label
+              key={pref}
+              className="flex items-center bg-white/5 backdrop-blur-sm p-3 rounded-xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
+            >
               <input
                 type="checkbox"
                 checked={formData.preferences.showMe.includes(pref)}
                 onChange={(e) => {
                   const newShowMe = e.target.checked
                     ? [...formData.preferences.showMe, pref]
-                    : formData.preferences.showMe.filter(p => p !== pref);
-                  setFormData({...formData, preferences: {...formData.preferences, showMe: newShowMe}});
+                    : formData.preferences.showMe.filter((p) => p !== pref);
+                  setFormData({
+                    ...formData,
+                    preferences: { ...formData.preferences, showMe: newShowMe },
+                  });
                 }}
-                className="mr-2"
+                className="mr-3 w-4 h-4 text-purple-500"
               />
-              <span className="capitalize">{pref}</span>
+              <span className="capitalize text-white">{pref}</span>
             </label>
           ))}
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Age range: {formData.preferences.ageRange.min} - {formData.preferences.ageRange.max}
+      <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
+        <label className="block text-sm font-semibold text-white mb-4">
+          Age range: {formData.preferences.ageRange.min} -{" "}
+          {formData.preferences.ageRange.max} years
         </label>
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
+          <span className="text-white/60 text-sm">Min</span>
           <input
             type="range"
             min="18"
             max="50"
             value={formData.preferences.ageRange.min}
-            onChange={(e) => setFormData({
-              ...formData,
-              preferences: {
-                ...formData.preferences,
-                ageRange: { ...formData.preferences.ageRange, min: parseInt(e.target.value) }
-              }
-            })}
-            className="flex-1"
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                preferences: {
+                  ...formData.preferences,
+                  ageRange: {
+                    ...formData.preferences.ageRange,
+                    min: parseInt(e.target.value),
+                  },
+                },
+              })
+            }
+            className="flex-1 accent-purple-500"
           />
+          <span className="text-white/60 text-sm">Max</span>
           <input
             type="range"
             min="18"
             max="50"
             value={formData.preferences.ageRange.max}
-            onChange={(e) => setFormData({
-              ...formData,
-              preferences: {
-                ...formData.preferences,
-                ageRange: { ...formData.preferences.ageRange, max: parseInt(e.target.value) }
-              }
-            })}
-            className="flex-1"
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                preferences: {
+                  ...formData.preferences,
+                  ageRange: {
+                    ...formData.preferences.ageRange,
+                    max: parseInt(e.target.value),
+                  },
+                },
+              })
+            }
+            className="flex-1 accent-purple-500"
           />
         </div>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+      <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-5 border border-white/10">
+        <label className="block text-sm font-semibold text-white mb-4 flex items-center gap-2">
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+            />
+          </svg>
           Maximum distance: {formData.preferences.maxDistance} km
         </label>
         <input
@@ -344,11 +469,16 @@ export default function Onboarding() {
           min="5"
           max="100"
           value={formData.preferences.maxDistance}
-          onChange={(e) => setFormData({
-            ...formData,
-            preferences: { ...formData.preferences, maxDistance: parseInt(e.target.value) }
-          })}
-          className="w-full"
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              preferences: {
+                ...formData.preferences,
+                maxDistance: parseInt(e.target.value),
+              },
+            })
+          }
+          className="w-full accent-purple-500"
         />
       </div>
     </div>
@@ -357,8 +487,8 @@ export default function Onboarding() {
   const canGoNext = () => {
     switch (step) {
       case 1:
-        if (!formData.name || !formData.dateOfBirth || !formData.gender) return false;
-        // Check age >= 18
+        if (!formData.name || !formData.dateOfBirth || !formData.gender)
+          return false;
         const birthDate = new Date(formData.dateOfBirth);
         const age = new Date().getFullYear() - birthDate.getFullYear();
         return age >= 18;
@@ -379,34 +509,53 @@ export default function Onboarding() {
     try {
       setLoading(true);
       const result = await authService.completeOnboarding(formData);
-      
+
       if (result.success) {
         login(result.data.user, result.data.token);
         authService.setToken(result.data.token);
-        navigate('/home');
+        navigate("/home");
       }
     } catch (error: any) {
-      console.error('Onboarding error:', error);
-      alert(error.response?.data?.error || 'Failed to complete onboarding');
+      console.error("Onboarding error:", error);
+      alert(error.response?.data?.error || "Failed to complete onboarding");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl animate-pulse" />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/30 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
+      </div>
+
+      <div className="relative z-10 bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl p-6 sm:p-10 max-w-2xl w-full border border-white/10">
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl">
+            <span className="text-2xl">💕</span>
+          </div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            S.T.A.R.T.
+          </h1>
+        </div>
+
         {step === 1 && renderStep1()}
         {step === 2 && renderStep2()}
         {step === 3 && renderStep3()}
         {step === 4 && renderStep4()}
         {step === 5 && renderStep5()}
 
-        <div className="flex gap-4 mt-8">
+        <div className="flex gap-3 sm:gap-4 mt-8">
           {step > 1 && (
             <button
               onClick={() => setStep(step - 1)}
-              className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="px-6 py-3.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-white hover:bg-white/20 transition font-medium"
             >
               Back
             </button>
@@ -415,7 +564,7 @@ export default function Onboarding() {
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canGoNext()}
-              className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-700"
+              className="flex-1 px-6 py-3.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-600 hover:to-pink-600 transition shadow-lg disabled:shadow-none"
             >
               Continue
             </button>
@@ -423,20 +572,34 @@ export default function Onboarding() {
             <button
               onClick={handleComplete}
               disabled={!canGoNext() || loading}
-              className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:bg-purple-700"
+              className="flex-1 px-6 py-3.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed hover:from-purple-600 hover:to-pink-600 transition shadow-lg disabled:shadow-none flex items-center justify-center gap-2"
             >
-              {loading ? 'Completing...' : 'Complete Setup'}
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Completing...
+                </>
+              ) : (
+                <>
+                  <span className="text-lg">🚀</span>
+                  Complete Setup
+                </>
+              )}
             </button>
           )}
         </div>
 
         {/* Progress Indicator */}
-        <div className="flex justify-center gap-2 mt-6">
+        <div className="flex justify-center gap-2 mt-8">
           {[1, 2, 3, 4, 5].map((s) => (
             <div
               key={s}
-              className={`w-2 h-2 rounded-full ${
-                s === step ? 'bg-purple-600' : s < step ? 'bg-purple-300' : 'bg-gray-200'
+              className={`h-2 rounded-full transition-all ${
+                s === step
+                  ? "w-8 bg-gradient-to-r from-purple-500 to-pink-500"
+                  : s < step
+                  ? "w-2 bg-purple-400"
+                  : "w-2 bg-white/20"
               }`}
             />
           ))}
@@ -445,4 +608,3 @@ export default function Onboarding() {
     </div>
   );
 }
-
