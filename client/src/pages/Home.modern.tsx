@@ -277,7 +277,7 @@ export default function Home() {
             <Button
               onClick={() => {
                 setShowOutOfCredits(false);
-                navigate('/chat');
+                navigate('/chats');
               }}
               variant="primary"
               fullWidth

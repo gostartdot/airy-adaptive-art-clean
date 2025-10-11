@@ -403,47 +403,51 @@ export default function Onboarding() {
           Age range: {formData.preferences.ageRange.min} -{" "}
           {formData.preferences.ageRange.max} years
         </label>
-        <div className="flex gap-4 items-center">
-          <span className="text-white/60 text-sm">Min</span>
-          <input
-            type="range"
-            min="18"
-            max="50"
-            value={formData.preferences.ageRange.min}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                preferences: {
-                  ...formData.preferences,
-                  ageRange: {
-                    ...formData.preferences.ageRange,
-                    min: parseInt(e.target.value),
+        <div className="sm:flex gap-4 items-center">
+          <div className="flex justify-center items-center gap-2">
+            <span className="text-white/60 text-sm">Min</span>
+            <input
+              type="range"
+              min="18"
+              max="50"
+              value={formData.preferences.ageRange.min}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  preferences: {
+                    ...formData.preferences,
+                    ageRange: {
+                      ...formData.preferences.ageRange,
+                      min: parseInt(e.target.value),
+                    },
                   },
-                },
-              })
-            }
-            className="flex-1 accent-purple-500"
-          />
-          <span className="text-white/60 text-sm">Max</span>
-          <input
-            type="range"
-            min="18"
-            max="50"
-            value={formData.preferences.ageRange.max}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                preferences: {
-                  ...formData.preferences,
-                  ageRange: {
-                    ...formData.preferences.ageRange,
-                    max: parseInt(e.target.value),
+                })
+              }
+              className="flex-1 accent-purple-500"
+            />
+          </div>
+          <div className="flex justify-center items-center gap-2">
+            <span className="text-white/60 text-sm">Max</span>
+            <input
+              type="range"
+              min="18"
+              max="50"
+              value={formData.preferences.ageRange.max}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  preferences: {
+                    ...formData.preferences,
+                    ageRange: {
+                      ...formData.preferences.ageRange,
+                      max: parseInt(e.target.value),
+                    },
                   },
-                },
-              })
-            }
-            className="flex-1 accent-purple-500"
-          />
+                })
+              }
+              className="flex-1 accent-purple-500"
+            />
+          </div>
         </div>
       </div>
 

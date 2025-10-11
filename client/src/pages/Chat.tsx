@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io, Socket } from "socket.io-client";
 import { chatService } from "../services/chatService";
+import { matchService } from "../services/matchService";
+import { creditService } from "../services/creditService";
 import { useAuth } from "../store/useAuthStore";
 import { formatTime } from "../utils/formatDate";
+import { CREDIT_COSTS } from "../utils/constants";
 
 const SOCKET_URL =
   import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000";
@@ -17,14 +20,31 @@ export default function Chat() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [matchData, setMatchData] = useState<any>(null);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [credits, setCredits] = useState(0);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (matchId) {
       fetchMessages();
+      fetchMatchData();
+      fetchCredits();
     }
   }, [matchId]);
+
+  const fetchCredits = async () => {
+    try {
+      const result = await creditService.getBalance();
+      if (result.success) {
+        setCredits(result.data.credits);
+      }
+    } catch (error) {
+      console.error("Error fetching credits:", error);
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -90,6 +110,105 @@ export default function Chat() {
     }
   };
 
+  const fetchMatchData = async () => {
+    if (!matchId) return;
+    try {
+      const result = await matchService.getMatch(matchId);
+      console.log(result);
+      if (result.success) {
+        setMatchData(result.data);
+      }
+    } catch (error) {
+      console.error("Error fetching match data:", error);
+    }
+  };
+
+  const getDisplayName = () => {
+    // if (!matchData || !matchData.otherUser?.name || !matchData.otherUser?.maskedName) return "Anonymous";
+    
+    
+    const name = matchData.otherUser.maskedName || matchData.otherUser.name;
+    
+    // If revealed, show full name
+    if (matchData.isRevealed) {
+      return name;
+    }
+    
+    // If anonymous, show name with asterisks (e.g., "Aa**z" for "Aariz")
+    if (name.length <= 3) {
+      return name;
+    }
+    
+    const firstTwo = name.substring(0, 2);
+    const lastOne = name[name.length - 1];
+    const asterisks = "*".repeat(Math.max(name.length - 3, 2));
+    
+    return `${firstTwo}${asterisks}${lastOne}`;
+  };
+
+  const handleProfileClick = () => {
+    setShowProfileModal(true);
+  };
+
+  const handleSkipMatch = async () => {
+    if (!matchId || !matchData) return;
+
+    if (credits < CREDIT_COSTS.SKIP_MATCH) {
+      alert("Not enough credits! You need 1 credit to skip.");
+      return;
+    }
+
+    if (
+      !confirm(
+        "Skip this match? You will lose 1 credit and won't see this profile again. All chats will be closed."
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await matchService.skipMatch(matchId);
+      setCredits(credits - CREDIT_COSTS.SKIP_MATCH);
+      alert("Match skipped successfully");
+      navigate("/chats");
+    } catch (error: any) {
+      alert(error.response?.data?.error || "Failed to skip match");
+    }
+  };
+
+  const handleRequestReveal = async () => {
+    if (!matchId || !matchData) return;
+
+    if (matchData.isRevealed) {
+      alert("Profile is already revealed!");
+      return;
+    }
+
+    if (credits < CREDIT_COSTS.REQUEST_REVEAL) {
+      alert(`Not enough credits! You need ${CREDIT_COSTS.REQUEST_REVEAL} credits to request reveal.`);
+      return;
+    }
+
+    if (
+      !confirm(
+        `Request to reveal profiles? This costs ${CREDIT_COSTS.REQUEST_REVEAL} credits. Both must accept to reveal.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await matchService.requestReveal(matchId);
+      setCredits(credits - CREDIT_COSTS.REQUEST_REVEAL);
+      alert("✨ Reveal request sent! You can chat while waiting for their response.");
+      setShowMenu(false);
+      // Refresh match data
+      fetchMatchData();
+    } catch (error: any) {
+      alert(error.response?.data?.error || "Failed to request reveal");
+    }
+  };
+
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !matchId || sending) return;
@@ -121,7 +240,7 @@ export default function Chat() {
       <div className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 py-4">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => navigate("/chat")}
+            onClick={() => navigate("/chats")}
             className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition border border-white/20"
           >
             <svg
@@ -139,7 +258,19 @@ export default function Chat() {
             </svg>
           </button>
           <div className="flex-1">
-            <h2 className="font-semibold text-white text-lg">Match Chat</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleProfileClick}
+                className="font-semibold text-white text-lg hover:text-purple-300 transition-colors cursor-pointer"
+              >
+                {matchData ? getDisplayName() : "Loading..."}
+              </button>
+              {matchData && !matchData.isRevealed && (
+                <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full border border-purple-400/30">
+                  🎭
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               <div
                 className={`w-2 h-2 rounded-full ${
@@ -155,6 +286,81 @@ export default function Chat() {
               </span>
             </div>
           </div>
+          
+          {/* Action Buttons */}
+          {matchId && (
+            <div className="flex items-center gap-2">
+              {/* Skip Button */}
+              <button
+                onClick={handleSkipMatch}
+                className="px-3 py-2 bg-red-500/20 backdrop-blur-sm rounded-lg flex items-center gap-2 text-red-300 hover:bg-red-500/30 transition border border-red-400/30 text-sm font-medium"
+                title="Skip Match (1 credit)"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span className="hidden sm:inline">Skip</span>
+              </button>
+
+              {/* Request Reveal Button */}
+              {matchData && !matchData.isRevealed && (
+                <button
+                  onClick={handleRequestReveal}
+                  className="px-3 py-2 bg-purple-500/20 backdrop-blur-sm rounded-lg flex items-center gap-2 text-purple-300 hover:bg-purple-500/30 transition border border-purple-400/30 text-sm font-medium"
+                  title="Request Reveal (3 credits)"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span className="hidden sm:inline">Reveal</span>
+                </button>
+              )}
+
+              {/* Menu Button */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white hover:bg-white/20 transition border border-white/20"
+                  title="More options"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  </svg>
+                </button>
+
+                {/* Menu Dropdown */}
+                {showMenu && (
+                  <div className="absolute right-0 top-12 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden z-50">
+                    <button
+                      onClick={() => {
+                        setShowProfileModal(true);
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left text-white hover:bg-slate-700 transition flex items-center gap-3"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                      <span className="text-sm">View Profile</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        alert("Block feature coming soon!");
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left text-red-300 hover:bg-slate-700 transition flex items-center gap-3"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                      </svg>
+                      <span className="text-sm">Block User</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -254,6 +460,202 @@ export default function Chat() {
           </button>
         </div>
       </form>
+
+      {/* Profile Modal */}
+      {showProfileModal && matchData && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          style={{ animation: "fadeIn 0.2s ease-out" }}
+          onClick={() => setShowProfileModal(false)}
+        >
+          <div
+            className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto"
+            style={{ animation: "scaleIn 0.3s ease-out" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="relative mb-6">
+              <h2 className="text-2xl font-bold text-white text-center">
+                {getDisplayName()}
+              </h2>
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="absolute top-0 right-0 text-slate-400 hover:text-white transition-colors p-1 hover:bg-slate-700 rounded-full"
+                aria-label="Close modal"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Profile Content */}
+            <div className="space-y-4">
+              {/* Avatar & Name */}
+              <div className="flex flex-col items-center text-center">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-3xl font-bold shadow-xl mb-3">
+                  {matchData.otherUser?.name?.[0]?.toUpperCase()}
+                </div>
+                <h3 className="text-xl font-bold text-white mb-1">
+                  {getDisplayName()}
+                </h3>
+                {!matchData.isRevealed && (
+                  <span className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-400/30">
+                    🎭 Anonymous Profile
+                  </span>
+                )}
+              </div>
+
+              {/* Limited Info Message */}
+              {!matchData.isRevealed && (
+                <div className="bg-purple-500/10 border border-purple-400/30 rounded-xl p-4">
+                  <p className="text-sm text-purple-200 text-center">
+                    <span className="font-semibold">Privacy Protected</span>
+                    <br />
+                    Full profile will be visible once you both agree to reveal identities.
+                  </p>
+                </div>
+              )}
+
+              {/* Bio - Show if revealed or limited version */}
+              {matchData.otherUser?.bio && (
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <h4 className="text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
+                    Bio
+                  </h4>
+                  <p className="text-white/90 text-sm leading-relaxed">
+                    {matchData.isRevealed
+                      ? matchData.otherUser.bio
+                      : matchData.otherUser.bio.length > 100
+                      ? matchData.otherUser.bio.substring(0, 100) + "..."
+                      : matchData.otherUser.bio}
+                  </p>
+                </div>
+              )}
+
+              {/* Interests - Show limited or full */}
+              {matchData.otherUser?.interests &&
+                matchData.otherUser.interests.length > 0 && (
+                  <div className="bg-slate-700/50 rounded-xl p-4">
+                    <h4 className="text-sm font-semibold text-white/80 mb-3 uppercase tracking-wide">
+                      Interests
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {(matchData.isRevealed
+                        ? matchData.otherUser.interests
+                        : matchData.otherUser.interests.slice(0, 3)
+                      ).map((interest: string, index: number) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1.5 bg-purple-500/20 text-purple-200 border border-purple-400/30 rounded-lg text-sm"
+                        >
+                          {interest}
+                        </span>
+                      ))}
+                      {!matchData.isRevealed &&
+                        matchData.otherUser.interests.length > 3 && (
+                          <span className="px-3 py-1.5 bg-slate-600/50 text-slate-300 border border-slate-500/30 rounded-lg text-sm">
+                            +{matchData.otherUser.interests.length - 3} more
+                          </span>
+                        )}
+                    </div>
+                  </div>
+                )}
+
+              {/* City - Show only if revealed */}
+              {matchData.isRevealed && matchData.otherUser?.city && (
+                <div className="bg-slate-700/50 rounded-xl p-4">
+                  <h4 className="text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
+                    Location
+                  </h4>
+                  <p className="text-white/90 flex items-center gap-2">
+                    <svg
+                      className="w-4 h-4 text-purple-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    {matchData.otherUser.city}
+                  </p>
+                </div>
+              )}
+
+              {/* Reveal Request Info */}
+              {!matchData.isRevealed && (
+                <div className="bg-slate-700/50 rounded-xl p-4 text-center">
+                  <p className="text-sm text-slate-300 mb-3">
+                    Want to see the full profile?
+                  </p>
+                  <button className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all">
+                    Request Identity Reveal
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Animations */}
+      <style>{`
+        @keyframes slide-up {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+
+        @keyframes scaleIn {
+          from {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
     </div>
   );
 }

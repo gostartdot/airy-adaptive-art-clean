@@ -467,7 +467,7 @@ export default function Profile() {
             <span className="text-xs font-medium">Home</span>
           </button>
           <button
-            onClick={() => navigate("/chat")}
+            onClick={() => navigate("/chats")}
             className="flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-all"
           >
             <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">

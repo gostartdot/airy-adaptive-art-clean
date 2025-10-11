@@ -535,7 +535,7 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-3">
                 <button
-                  onClick={() => navigate("/chat")}
+                  onClick={() => navigate("/chats")}
                   className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
                 >
                   Go to Chats
@@ -565,7 +565,7 @@ export default function Home() {
             <span className="text-xs font-semibold">Home</span>
           </button>
           <button
-            onClick={() => navigate("/chat")}
+            onClick={() => navigate("/chats")}
             className="flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-all"
           >
             <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">

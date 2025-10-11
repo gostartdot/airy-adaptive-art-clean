@@ -4,6 +4,8 @@ import Onboarding from '../pages/Onboarding';
 import Home from '../pages/Home';
 import Chat from '../pages/Chat';
 import Profile from '../pages/Profile';
+import Terms from '../pages/Terms';
+import Privacy from '../pages/Privacy';
 import ProtectedRoute from './ProtectedRoute';
 
 export default function AppRoutes() {
@@ -12,12 +14,14 @@ export default function AppRoutes() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
         
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/chats" element={<Chat />} />
           <Route path="/chat/:matchId" element={<Chat />} />
-          <Route path="/chat" element={<Chat />} />
           <Route path="/profile" element={<Profile />} />
         </Route>
 
