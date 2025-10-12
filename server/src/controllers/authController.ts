@@ -113,7 +113,7 @@ export const completeOnboarding = async (req: Request, res: Response) => {
       bio,
       interests,
       preferences,
-      credits: 5, // Starting credits
+      credits: 10, // Starting credits
       lastCreditRefresh: new Date(),
       isActive: true,
       lastActive: new Date()
