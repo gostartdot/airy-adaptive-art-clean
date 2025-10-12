@@ -558,7 +558,7 @@ function LandingContent() {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-slate-800 border border-slate-700 rounded-2xl p-8 w-full max-w-md max-h-[85vh] overflow-y-auto"
+            className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border border-slate-700 rounded-2xl p-8 w-full max-w-md max-h-[85vh] overflow-y-auto"
             style={{
               animation: "scaleIn 0.3s ease-out"
             }}

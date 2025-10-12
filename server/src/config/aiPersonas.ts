@@ -16,6 +16,10 @@ export interface AIPersona {
     responsePatterns: string[];
     deflectionResponses?: string[]; // How to respond if asked about being AI
   };
+  responseDelay?: {
+    min: number; // Minimum delay in milliseconds
+    max: number; // Maximum delay in milliseconds
+  };
   preferences: {
     showMe: string[];
     ageRange: { min: number; max: number };
@@ -51,6 +55,10 @@ export const FEMALE_PERSONAS: AIPersona[] = [
         "Lol no! I'm just sitting here on my phone like everyone else on this app 😊"
       ]
     },
+    responseDelay: {
+      min: 180000,  // 3 minutes - energetic and quick to respond
+      max: 300000   // 5 minutes
+    },
     preferences: {
       showMe: ['man'],
       ageRange: { min: 24, max: 32 }
@@ -78,6 +86,10 @@ export const FEMALE_PERSONAS: AIPersona[] = [
         'Shares interesting thoughts or quotes'
       ]
     },
+    responseDelay: {
+      min: 240000,  // 4 minutes - thoughtful, takes time to craft responses
+      max: 420000   // 7 minutes
+    },
     preferences: {
       showMe: ['man'],
       ageRange: { min: 23, max: 30 }
@@ -103,6 +115,10 @@ export const FEMALE_PERSONAS: AIPersona[] = [
         'Uses emojis moderately 🧘‍♀️💪🍛😊',
         'Encourages healthy lifestyle choices'
       ]
+    },
+    responseDelay: {
+      min: 180000,  // 3 minutes - balanced, moderately quick
+      max: 360000   // 6 minutes
     },
     preferences: {
       showMe: ['man'],
@@ -130,6 +146,10 @@ export const FEMALE_PERSONAS: AIPersona[] = [
         'Suggests unique date ideas like markets or gigs'
       ]
     },
+    responseDelay: {
+      min: 300000,  // 5 minutes - creative, takes time to express thoughts artistically
+      max: 600000   // 10 minutes
+    },
     preferences: {
       showMe: ['man', 'woman'],
       ageRange: { min: 25, max: 32 }
@@ -155,6 +175,10 @@ export const FEMALE_PERSONAS: AIPersona[] = [
         'Uses casual emojis 😂💼🚀😎',
         'Debates random topics playfully'
       ]
+    },
+    responseDelay: {
+      min: 180000,  // 3 minutes - busy founder, responds quickly
+      max: 240000   // 4 minutes
     },
     preferences: {
       showMe: ['man'],
@@ -186,6 +210,10 @@ export const MALE_PERSONAS: AIPersona[] = [
         'Suggests activities like trying new restaurants'
       ]
     },
+    responseDelay: {
+      min: 180000,  // 3 minutes - straightforward and quick
+      max: 300000   // 5 minutes
+    },
     preferences: {
       showMe: ['woman'],
       ageRange: { min: 23, max: 30 }
@@ -211,6 +239,10 @@ export const MALE_PERSONAS: AIPersona[] = [
         'Uses casual emojis 🎸☕😊',
         'Asks about their music taste or favorite foods'
       ]
+    },
+    responseDelay: {
+      min: 240000,  // 4 minutes - thoughtful romantic type
+      max: 420000   // 7 minutes
     },
     preferences: {
       showMe: ['woman'],
@@ -238,6 +270,10 @@ export const MALE_PERSONAS: AIPersona[] = [
         'Discusses movies or current events'
       ]
     },
+    responseDelay: {
+      min: 300000,  // 5 minutes - busy investment banker
+      max: 480000   // 8 minutes
+    },
     preferences: {
       showMe: ['woman'],
       ageRange: { min: 24, max: 32 }
@@ -264,6 +300,10 @@ export const MALE_PERSONAS: AIPersona[] = [
         'Asks about their interests in art or culture'
       ]
     },
+    responseDelay: {
+      min: 240000,  // 4 minutes - thoughtful intellectual
+      max: 420000   // 7 minutes
+    },
     preferences: {
       showMe: ['woman'],
       ageRange: { min: 23, max: 30 }
@@ -289,6 +329,10 @@ export const MALE_PERSONAS: AIPersona[] = [
         'Uses lots of casual emojis 😂🎤🍛',
         'Suggests fun, spontaneous activities'
       ]
+    },
+    responseDelay: {
+      min: 180000,  // 3 minutes - funny and quick
+      max: 300000   // 5 minutes
     },
     preferences: {
       showMe: ['woman'],

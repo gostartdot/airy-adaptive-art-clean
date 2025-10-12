@@ -11,11 +11,18 @@ export default function Profile() {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [credits, setCredits] = useState(0);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     bio: user?.bio || "",
     interests: user?.interests || [],
     city: user?.city || "",
+    photos: user?.photos || [],
+    preferences: {
+      showMe: user?.preferences?.showMe || [],
+      ageRange: user?.preferences?.ageRange || { min: 22, max: 30 },
+      maxDistance: user?.preferences?.maxDistance || 20,
+    },
   });
 
   useEffect(() => {
@@ -33,6 +40,12 @@ export default function Profile() {
           bio: result.data.bio || "",
           interests: result.data.interests || [],
           city: result.data.city,
+          photos: result.data.photos || [],
+          preferences: {
+            showMe: result.data.preferences?.showMe || [],
+            ageRange: result.data.preferences?.ageRange || { min: 22, max: 30 },
+            maxDistance: result.data.preferences?.maxDistance || 20,
+          },
         });
       }
     } catch (error) {
@@ -63,6 +76,64 @@ export default function Profile() {
       }
     } catch (error: any) {
       alert(error.response?.data?.error || "Failed to update profile");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check if user already has 4 photos
+    if (formData.photos.length >= 4) {
+      alert("You can only upload up to 4 photos");
+      return;
+    }
+
+    try {
+      setUploadingPhoto(true);
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result as string;
+        const result = await userService.uploadPhoto(base64);
+        
+        if (result.success) {
+          const updatedPhotos = [...formData.photos, result.data.photoUrl];
+          setFormData({ ...formData, photos: updatedPhotos });
+          
+          // Update user in auth store
+          const profileResult = await userService.getProfile();
+          if (profileResult.success) {
+            updateUser(profileResult.data);
+          }
+          
+          alert("Photo uploaded successfully!");
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error: any) {
+      alert(error.response?.data?.error || "Failed to upload photo");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const handlePhotoDelete = async (index: number) => {
+    if (!confirm("Are you sure you want to delete this photo?")) return;
+
+    try {
+      setLoading(true);
+      const result = await userService.deletePhoto(index);
+      
+      if (result.success) {
+        const updatedPhotos = formData.photos.filter((_, i) => i !== index);
+        setFormData({ ...formData, photos: updatedPhotos });
+        updateUser(result.data);
+        alert("Photo deleted successfully!");
+      }
+    } catch (error: any) {
+      alert(error.response?.data?.error || "Failed to delete photo");
     } finally {
       setLoading(false);
     }
@@ -109,6 +180,64 @@ export default function Profile() {
 
         {/* Edit Form */}
         <div className="relative z-10 max-w-4xl mx-auto p-4 sm:p-6 space-y-6 pb-24">
+          {/* Photos */}
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
+            <label className="block text-sm font-semibold text-white/80 mb-3 uppercase tracking-wide">
+              Photos ({formData.photos.length} of 4)
+            </label>
+            <p className="text-xs text-white/50 mb-4">Upload 2-4 photos (minimum 2 required)</p>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              {[0, 1, 2, 3].map((index) => (
+                <div
+                  key={index}
+                  className="aspect-[3/4] border-2 border-dashed border-white/20 rounded-2xl flex items-center justify-center relative overflow-hidden bg-white/5 backdrop-blur-sm hover:border-white/40 transition"
+                >
+                  {formData.photos[index] ? (
+                    <>
+                      <img
+                        src={formData.photos[index]}
+                        alt={`Photo ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={() => handlePhotoDelete(index)}
+                        disabled={loading}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg transition disabled:opacity-50"
+                      >
+                        ×
+                      </button>
+                      {index === 0 && (
+                        <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
+                          MAIN
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <label className="cursor-pointer flex flex-col items-center w-full h-full justify-center hover:bg-white/10 transition">
+                      <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-2">
+                        {uploadingPhoto ? (
+                          <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <span className="text-2xl text-white">+</span>
+                        )}
+                      </div>
+                      <span className="text-xs text-white/70 font-medium">
+                        {uploadingPhoto ? "Uploading..." : "Add Photo"}
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        disabled={uploadingPhoto || formData.photos.length >= 4}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Name */}
           <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
             <label className="block text-sm font-semibold text-white/80 mb-3 uppercase tracking-wide">
@@ -192,6 +321,146 @@ export default function Profile() {
               placeholder="Your city"
             />
           </div>
+
+          {/* Preferences Section */}
+          <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
+            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <span className="text-xl">💖</span>
+              Dating Preferences
+            </h3>
+
+            {/* Show Me */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-white/80 mb-3 uppercase tracking-wide">
+                I'm interested in meeting:
+              </label>
+              <div className="space-y-2">
+                {["woman", "man", "non-binary"].map((pref) => (
+                  <label
+                    key={pref}
+                    className="flex items-center bg-white/5 backdrop-blur-sm p-3 rounded-xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.preferences.showMe.includes(pref)}
+                      onChange={(e) => {
+                        const newShowMe = e.target.checked
+                          ? [...formData.preferences.showMe, pref]
+                          : formData.preferences.showMe.filter((p) => p !== pref);
+                        setFormData({
+                          ...formData,
+                          preferences: { ...formData.preferences, showMe: newShowMe },
+                        });
+                      }}
+                      className="mr-3 w-4 h-4 text-purple-500"
+                    />
+                    <span className="capitalize text-white">{pref}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Age Range */}
+            <div className="mb-6">
+              <label className="block text-sm font-semibold text-white mb-4">
+                Age range: {formData.preferences.ageRange.min} -{" "}
+                {formData.preferences.ageRange.max} years
+              </label>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-white/60 text-sm w-12">Min</span>
+                  <input
+                    type="range"
+                    min="18"
+                    max="50"
+                    value={formData.preferences.ageRange.min}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        preferences: {
+                          ...formData.preferences,
+                          ageRange: {
+                            ...formData.preferences.ageRange,
+                            min: parseInt(e.target.value),
+                          },
+                        },
+                      })
+                    }
+                    className="flex-1 accent-purple-500"
+                  />
+                  <span className="text-white font-medium w-8 text-center">
+                    {formData.preferences.ageRange.min}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-white/60 text-sm w-12">Max</span>
+                  <input
+                    type="range"
+                    min="18"
+                    max="50"
+                    value={formData.preferences.ageRange.max}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        preferences: {
+                          ...formData.preferences,
+                          ageRange: {
+                            ...formData.preferences.ageRange,
+                            max: parseInt(e.target.value),
+                          },
+                        },
+                      })
+                    }
+                    className="flex-1 accent-purple-500"
+                  />
+                  <span className="text-white font-medium w-8 text-center">
+                    {formData.preferences.ageRange.max}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Maximum Distance */}
+            <div>
+              <label className="block text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  />
+                </svg>
+                Maximum distance: {formData.preferences.maxDistance} km
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="5"
+                  max="100"
+                  value={formData.preferences.maxDistance}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      preferences: {
+                        ...formData.preferences,
+                        maxDistance: parseInt(e.target.value),
+                      },
+                    })
+                  }
+                  className="flex-1 accent-purple-500"
+                />
+                <span className="text-white font-medium w-12 text-center">
+                  {formData.preferences.maxDistance}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -243,8 +512,29 @@ export default function Profile() {
         {/* Profile Header */}
         <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6 sm:p-8">
           <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
-            <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-4xl font-bold shadow-2xl">
-              {user?.name?.[0]?.toUpperCase()}
+            <div className="relative group">
+              {user?.photos?.[0] ? (
+                <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-2xl border-2 border-purple-400/50">
+                  <img
+                    src={user.photos[0]}
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-4xl font-bold shadow-2xl">
+                  {user?.name?.[0]?.toUpperCase()}
+                </div>
+              )}
+              <button
+                onClick={() => setEditing(true)}
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+              >
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </button>
             </div>
             <div className="text-center sm:text-left flex-1">
               <h2 className="text-3xl font-bold text-white mb-2">
@@ -291,21 +581,34 @@ export default function Profile() {
         {/* Photos */}
         {user?.photos && user.photos.length > 0 && (
           <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6">
-            <h3 className="font-semibold text-white text-lg mb-4 flex items-center gap-2">
-              <span className="text-xl">📸</span>
-              Photos
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-white text-lg flex items-center gap-2">
+                <span className="text-xl">📸</span>
+                Photos
+              </h3>
+              <button
+                onClick={() => setEditing(true)}
+                className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg text-sm font-medium transition border border-purple-400/30"
+              >
+                Edit Photos
+              </button>
+            </div>
             <div className="grid grid-cols-3 gap-3">
               {user.photos.map((photo, index) => (
                 <div
                   key={index}
-                  className="aspect-square rounded-2xl overflow-hidden border border-white/10"
+                  className="aspect-square rounded-2xl overflow-hidden border border-white/10 relative"
                 >
                   <img
                     src={photo}
                     alt={`Photo ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
+                  {index === 0 && (
+                    <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full font-semibold shadow-lg">
+                      MAIN
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -372,6 +675,69 @@ export default function Profile() {
             {user?.city}
           </p>
         </div>
+
+        {/* Dating Preferences */}
+        {user?.preferences && (
+          <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-white text-lg flex items-center gap-2">
+                <span className="text-xl">💖</span>
+                Dating Preferences
+              </h3>
+              <button
+                onClick={() => setEditing(true)}
+                className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg text-sm font-medium transition border border-purple-400/30"
+              >
+                Edit
+              </button>
+            </div>
+            <div className="space-y-4">
+              {/* Show Me */}
+              <div>
+                <p className="text-sm text-white/60 mb-2">Interested in:</p>
+                <div className="flex flex-wrap gap-2">
+                  {user.preferences.showMe?.map((gender: string) => (
+                    <span
+                      key={gender}
+                      className="px-3 py-1.5 bg-purple-500/20 text-purple-300 border border-purple-400/30 rounded-lg text-sm font-medium capitalize"
+                    >
+                      {gender}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Age Range */}
+              <div>
+                <p className="text-sm text-white/60 mb-2">Age range:</p>
+                <p className="text-white/80 font-medium">
+                  {user.preferences.ageRange?.min} - {user.preferences.ageRange?.max} years old
+                </p>
+              </div>
+
+              {/* Max Distance */}
+              <div>
+                <p className="text-sm text-white/60 mb-2">Maximum distance:</p>
+                <p className="text-white/80 font-medium flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4 text-purple-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                  </svg>
+                  {user.preferences.maxDistance} km
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Account Info */}
         <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6">

@@ -235,6 +235,13 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
       const aiPersona = getPersonaById(receiverIdStr);
       
       if (aiPersona) {
+        // Use persona-specific response delay, or default to 3-5 minutes
+        const minDelay = aiPersona.responseDelay?.min || 180000; // Default 3 minutes
+        const maxDelay = aiPersona.responseDelay?.max || 300000; // Default 5 minutes
+        const randomDelay = minDelay + Math.random() * (maxDelay - minDelay);
+        
+        console.log(`⏱️  ${aiPersona.name} will respond in ${Math.round(randomDelay / 1000)} seconds (${Math.round(randomDelay / 60000)} minutes)`);
+        
         // Generate AI response asynchronously (don't wait)
         setTimeout(async () => {
           try {
@@ -242,19 +249,20 @@ export const sendMessage = async (req: AuthRequest, res: Response) => {
           } catch (error) {
             console.error('Error generating AI response:', error);
           }
-        }, 2000 + Math.random() * 3000); // Random delay 2-5 seconds to feel natural
+        }, randomDelay);
       }
     } else {
       // Receiver is a real user - check if they have AI responses enabled (future feature)
       const receiver = await User.findById(receiverId);
       if (receiver && isAIPersona(receiverIdStr)) {
+        const randomDelay = 180000 + Math.random() * 120000; // 3-5 minutes for regular users
         setTimeout(async () => {
           try {
             await generateAIResponse(matchId, receiver, userId, content.trim(), io);
           } catch (error) {
             console.error('Error generating AI response:', error);
           }
-        }, 2000 + Math.random() * 3000);
+        }, randomDelay);
       }
     }
 

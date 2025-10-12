@@ -342,7 +342,7 @@ export default function Home() {
                 className="flex-1 px-6 py-3.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-purple-500/50 flex items-center justify-center gap-2"
               >
                 <span className="text-lg">💜</span>
-                Reveal (3 💎)
+                Reveal (1 💎)
               </button>
             </div>
           )}

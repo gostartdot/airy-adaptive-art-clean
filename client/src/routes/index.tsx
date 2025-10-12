@@ -7,10 +7,12 @@ import Profile from '../pages/Profile';
 import Terms from '../pages/Terms';
 import Privacy from '../pages/Privacy';
 import ProtectedRoute from './ProtectedRoute';
+import ScrollToTop from '../components/common/ScrollToTop';
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/onboarding" element={<Onboarding />} />

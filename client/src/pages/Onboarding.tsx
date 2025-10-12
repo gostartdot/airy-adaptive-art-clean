@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { authService } from "../services/authService";
 import { useAuth } from "../store/useAuthStore";
@@ -48,6 +48,13 @@ export default function Onboarding() {
       maxDistance: 20,
     },
   });
+
+  // Scroll to top whenever the step changes
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [step]);
 
   const renderStep1 = () => (
     <div className="space-y-6 animate-slide-up">

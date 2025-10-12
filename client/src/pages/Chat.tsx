@@ -22,7 +22,6 @@ export default function Chat() {
   const [connected, setConnected] = useState(false);
   const [matchData, setMatchData] = useState<any>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
   const [credits, setCredits] = useState(0);
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -201,7 +200,6 @@ export default function Chat() {
       await matchService.requestReveal(matchId);
       setCredits(credits - CREDIT_COSTS.REQUEST_REVEAL);
       alert("✨ Reveal request sent! You can chat while waiting for their response.");
-      setShowMenu(false);
       // Refresh match data
       fetchMatchData();
     } catch (error: any) {
@@ -307,7 +305,7 @@ export default function Chat() {
                 <button
                   onClick={handleRequestReveal}
                   className="px-3 py-2 bg-purple-500/20 backdrop-blur-sm rounded-lg flex items-center gap-2 text-purple-300 hover:bg-purple-500/30 transition border border-purple-400/30 text-sm font-medium"
-                  title="Request Reveal (3 credits)"
+                  title="Request Reveal (1 credit)"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -316,49 +314,6 @@ export default function Chat() {
                   <span className="hidden sm:inline">Reveal</span>
                 </button>
               )}
-
-              {/* Menu Button */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-center text-white hover:bg-white/20 transition border border-white/20"
-                  title="More options"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                  </svg>
-                </button>
-
-                {/* Menu Dropdown */}
-                {showMenu && (
-                  <div className="absolute right-0 top-12 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden z-50">
-                    <button
-                      onClick={() => {
-                        setShowProfileModal(true);
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-3 text-left text-white hover:bg-slate-700 transition flex items-center gap-3"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                      <span className="text-sm">View Profile</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        alert("Block feature coming soon!");
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-3 text-left text-red-300 hover:bg-slate-700 transition flex items-center gap-3"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                      </svg>
-                      <span className="text-sm">Block User</span>
-                    </button>
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </div>

@@ -252,7 +252,7 @@ export const requestReveal = async (req: AuthRequest, res: Response) => {
     }
 
     // Deduct credits
-    await deductCredits(userId, 'request_reveal', 3, matchId);
+    await deductCredits(userId, 'request_reveal', 1, matchId);
 
     // Update reveal request
     if (isUser1) {
@@ -313,7 +313,7 @@ export const acceptReveal = async (req: AuthRequest, res: Response) => {
     }
 
     // Deduct credits
-    await deductCredits(userId, 'accept_reveal', 3, matchId);
+    await deductCredits(userId, 'accept_reveal', 1, matchId);
 
     // Update reveal status
     if (isUser1) {
