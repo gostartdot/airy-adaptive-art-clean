@@ -286,6 +286,53 @@ export default function Onboarding() {
     </div>
   );
 
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions (max 1200px)
+          const maxSize = 1200;
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Failed to get canvas context'));
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG with 80% quality
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          resolve(compressedBase64);
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handlePhotoUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
@@ -293,14 +340,27 @@ export default function Onboarding() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result as string;
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Check file size (max 20MB before compression)
+    if (file.size > 20 * 1024 * 1024) {
+      alert('Image is too large. Please select an image under 20MB');
+      return;
+    }
+
+    try {
+      const compressedBase64 = await compressImage(file);
       const newPhotos = [...formData.photos];
-      newPhotos[index] = base64;
+      newPhotos[index] = compressedBase64;
       setFormData({ ...formData, photos: newPhotos });
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error compressing image:', error);
+      alert('Failed to process image. Please try another photo.');
+    }
   };
 
   const renderStep4 = () => (

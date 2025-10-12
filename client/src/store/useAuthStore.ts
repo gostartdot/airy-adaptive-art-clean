@@ -9,6 +9,11 @@ interface User {
   city?: string;
   matchedUsers?: any[];
   createdAt?: Date;
+  preferences?: {
+    showMe: string[];
+    ageRange: { min: number; max: number };
+    maxDistance: number;
+  };
 }
 
 interface AuthState {

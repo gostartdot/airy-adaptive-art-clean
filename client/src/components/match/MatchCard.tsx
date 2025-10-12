@@ -207,7 +207,7 @@ export default function MatchCard({
                   fullWidth
                   icon={<span>💜</span>}
                 >
-                  Reveal (3 💎)
+                  Reveal (1 💎)
                 </Button>
               </div>
             )}

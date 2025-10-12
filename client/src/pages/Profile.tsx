@@ -81,6 +81,53 @@ export default function Profile() {
     }
   };
 
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions (max 1200px)
+          const maxSize = 1200;
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            reject(new Error('Failed to get canvas context'));
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Compress to JPEG with 80% quality
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          resolve(compressedBase64);
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -91,28 +138,37 @@ export default function Profile() {
       return;
     }
 
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Check file size (max 20MB before compression)
+    if (file.size > 20 * 1024 * 1024) {
+      alert('Image is too large. Please select an image under 20MB');
+      return;
+    }
+
     try {
       setUploadingPhoto(true);
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64 = reader.result as string;
-        const result = await userService.uploadPhoto(base64);
+      const compressedBase64 = await compressImage(file);
+      const result = await userService.uploadPhoto(compressedBase64);
+      
+      if (result.success) {
+        const updatedPhotos = [...formData.photos, result.data.photoUrl];
+        setFormData({ ...formData, photos: updatedPhotos });
         
-        if (result.success) {
-          const updatedPhotos = [...formData.photos, result.data.photoUrl];
-          setFormData({ ...formData, photos: updatedPhotos });
-          
-          // Update user in auth store
-          const profileResult = await userService.getProfile();
-          if (profileResult.success) {
-            updateUser(profileResult.data);
-          }
-          
-          alert("Photo uploaded successfully!");
+        // Update user in auth store
+        const profileResult = await userService.getProfile();
+        if (profileResult.success) {
+          updateUser(profileResult.data);
         }
-      };
-      reader.readAsDataURL(file);
+        
+        alert("Photo uploaded successfully!");
+      }
     } catch (error: any) {
+      console.error('Error uploading photo:', error);
       alert(error.response?.data?.error || "Failed to upload photo");
     } finally {
       setUploadingPhoto(false);
@@ -346,7 +402,7 @@ export default function Profile() {
                       onChange={(e) => {
                         const newShowMe = e.target.checked
                           ? [...formData.preferences.showMe, pref]
-                          : formData.preferences.showMe.filter((p) => p !== pref);
+                          : formData.preferences.showMe.filter((p: string) => p !== pref);
                         setFormData({
                           ...formData,
                           preferences: { ...formData.preferences, showMe: newShowMe },
