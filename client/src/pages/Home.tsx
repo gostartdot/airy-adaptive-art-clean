@@ -13,6 +13,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [showOutOfCredits, setShowOutOfCredits] = useState(false);
   const [pendingRevealRequests, setPendingRevealRequests] = useState<any[]>([]);
+  const [showMatchingModal, setShowMatchingModal] = useState(false);
 
   useEffect(() => {
     fetchCredits();
@@ -75,6 +76,11 @@ export default function Home() {
 
     try {
       setLoading(true);
+      setShowMatchingModal(true);
+      
+      // Add a small delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       const result = await matchService.findMatch();
 
       if (result.success) {
@@ -85,6 +91,7 @@ export default function Home() {
       alert(error.response?.data?.error || "Failed to find match");
     } finally {
       setLoading(false);
+      setShowMatchingModal(false);
     }
   };
 
@@ -514,6 +521,41 @@ export default function Home() {
           renderMatch()
         )}
       </div>
+
+      {/* Matching Modal */}
+      {showMatchingModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
+          <div className="bg-gradient-to-br from-slate-800 to-purple-900 rounded-3xl p-8 sm:p-12 max-w-md w-full border border-white/20 shadow-2xl animate-in zoom-in duration-300">
+            <div className="text-center">
+              {/* Animated Heart Icon */}
+              <div className="relative w-24 h-24 mx-auto mb-8">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center animate-pulse">
+                  <span className="text-5xl">💕</span>
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl opacity-50 animate-ping" />
+              </div>
+              
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+                Finding Your Match...
+              </h2>
+              <p className="text-white/70 text-lg mb-6">
+                Connecting you with someone special
+              </p>
+              
+              {/* Loading dots */}
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-3 h-3 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-3 h-3 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+              
+              <p className="text-white/50 text-sm mt-8">
+                This may take a few moments...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Out of Credits Modal */}
       {showOutOfCredits && (

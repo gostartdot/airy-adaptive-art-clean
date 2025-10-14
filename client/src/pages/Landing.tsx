@@ -7,16 +7,19 @@ import { useAuth } from "../store/useAuthStore";
 
 function LandingContent() {
   const navigate = useNavigate();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [hasNavigated, setHasNavigated] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/home");
+    // Only navigate once to prevent redirect loops
+    if (isAuthenticated && !hasNavigated) {
+      setHasNavigated(true);
+      navigate("/home", { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, hasNavigated]);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -27,29 +30,46 @@ function LandingContent() {
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       setIsLoading(true);
+      
+      // Clear any stale auth data before attempting new login
+      logout();
+      authService.removeToken();
+      
       const result = await authService.googleAuth(
         credentialResponse.credential
       );
 
-      if (result.data.isNewUser) {
+      if (result.success && result.data.isNewUser) {
         setShowModal(false);
+        setIsLoading(false);
         navigate("/onboarding", {
           state: {
             googleId: result.data.googleId,
             email: result.data.email,
             name: result.data.name,
           },
+          replace: true
         });
-      } else {
+      } else if (result.success && !result.data.isNewUser) {
         login(result.data.user, result.data.token);
         authService.setToken(result.data.token);
         setShowModal(false);
-        navigate("/home");
+        setIsLoading(false);
+        setHasNavigated(true);
+        navigate("/home", { replace: true });
+      } else {
+        throw new Error("Invalid response from server");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Google auth error:", error);
-      alert("Failed to sign in with Google. Please try again.");
+      // Clear any partial auth state
+      logout();
+      authService.removeToken();
+      
+      const errorMessage = error.response?.data?.message || error.message || "Failed to sign in with Google. Please try again.";
+      alert(errorMessage);
       setIsLoading(false);
+      setShowModal(false);
     }
   };
 
@@ -251,9 +271,9 @@ function LandingContent() {
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10"
+                className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 sm:p-6 border border-white/10"
               >
-                <div className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+                <div className="text-xl  sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
                   {stat.value}
                 </div>
                 <div className="text-white/60 text-sm sm:text-base">
@@ -469,7 +489,7 @@ function LandingContent() {
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <div className="bg-white/10 backdrop-blur-sm rounded-4xl p-6 sm:p-8 inline-block border border-white/10">
+                <div className="bg-white/10 backdrop-blur-sm rounded-4xl p-4 sm:p-8 inline-block border border-white/10">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleError}
@@ -570,7 +590,7 @@ function LandingContent() {
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-0 right-0 text-slate-400 hover:text-white transition-colors p-1 hover:bg-slate-700 rounded-full"
+                className="absolute top-0 -right-2 text-slate-400 hover:text-white transition-colors p-1 hover:bg-slate-700 rounded-full"
                 aria-label="Close modal"
               >
                 <X className="w-6 h-6" />

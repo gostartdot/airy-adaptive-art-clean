@@ -49,6 +49,14 @@ export default function Onboarding() {
     },
   });
 
+  // Redirect if no Google data is present
+  useEffect(() => {
+    if (!location.state?.googleId || !location.state?.email) {
+      console.error("Missing Google auth data, redirecting to landing");
+      navigate("/", { replace: true });
+    }
+  }, [location.state, navigate]);
+
   // Scroll to top whenever the step changes
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -584,12 +592,14 @@ export default function Onboarding() {
       if (result.success) {
         login(result.data.user, result.data.token);
         authService.setToken(result.data.token);
-        navigate("/home");
+        navigate("/home", { replace: true });
+      } else {
+        throw new Error("Failed to complete onboarding");
       }
     } catch (error: any) {
       console.error("Onboarding error:", error);
-      alert(error.response?.data?.error || "Failed to complete onboarding");
-    } finally {
+      const errorMessage = error.response?.data?.error || error.message || "Failed to complete onboarding";
+      alert(errorMessage);
       setLoading(false);
     }
   };

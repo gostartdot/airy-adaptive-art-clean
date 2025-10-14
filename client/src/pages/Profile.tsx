@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { userService } from "../services/userService";
 import { creditService } from "../services/creditService";
+import { authService } from "../services/authService";
 import { useAuth } from "../store/useAuthStore";
 import { INTERESTS_OPTIONS } from "../utils/constants";
 
@@ -197,8 +198,18 @@ export default function Profile() {
 
   const handleLogout = () => {
     if (confirm("Are you sure you want to sign out?")) {
+      // Clear all auth data
       logout();
-      navigate("/");
+      authService.removeToken();
+      
+      // Clear any other cached data
+      sessionStorage.clear();
+      
+      // Navigate to landing page
+      navigate("/", { replace: true });
+      
+      // Force reload to clear any in-memory state
+      window.location.href = "/";
     }
   };
 
