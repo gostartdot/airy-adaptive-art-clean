@@ -11,9 +11,29 @@ import { errorHandler, notFound } from './middlewares/errorHandler';
 const app: Application = express();
 
 // Middleware
+// Allow multiple origins for development and production
+const allowedOrigins = [
+  process.env.CLIENT_URL,
+  'http://localhost:5174',
+  'http://localhost:5173',
+  'https://gostart.live',
+  'https://www.gostart.live'
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5174',
-  credentials: true
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1 && process.env.NODE_ENV === 'production') {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json({ limit: '10mb' }));

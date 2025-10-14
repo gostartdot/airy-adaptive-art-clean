@@ -27,12 +27,27 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect to login if:
+    // 1. It's a 401 error
+    // 2. It's not the login/signup endpoints
+    // 3. User has a token (meaning they were logged in)
+    const isAuthEndpoint = error.config?.url?.includes('/auth/google') || 
+                           error.config?.url?.includes('/auth/signup');
+    const hasToken = localStorage.getItem('token');
+    
+    if (error.response?.status === 401 && !isAuthEndpoint && hasToken) {
       // Unauthorized - clear token and redirect to login
+      console.error('Authentication failed, redirecting to login');
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/';
     }
+    
+    // Log errors for debugging
+    if (error.response?.status >= 500) {
+      console.error('Server error:', error.response?.status, error.response?.data);
+    }
+    
     return Promise.reject(error);
   }
 );

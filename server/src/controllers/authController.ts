@@ -14,8 +14,16 @@ export const googleAuth = async (req: Request, res: Response) => {
   try {
     const { credential } = req.body;
 
+    console.log('Google auth attempt received');
+
     if (!credential) {
+      console.error('No credential provided');
       return sendError(res, 'No credential provided');
+    }
+
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      console.error('GOOGLE_CLIENT_ID not configured on server');
+      return sendError(res, 'Server configuration error');
     }
 
     // Verify Google token
@@ -27,15 +35,18 @@ export const googleAuth = async (req: Request, res: Response) => {
     const payload = ticket.getPayload();
     
     if (!payload) {
+      console.error('Invalid Google token payload');
       return sendError(res, 'Invalid Google token');
     }
 
     const { sub: googleId, email, name } = payload;
+    console.log('Google auth successful for:', email);
 
     // Check if user exists
     let user = await User.findOne({ googleId });
 
     if (user) {
+      console.log('Existing user logging in:', user._id);
       // Update last active
       user.lastActive = new Date();
       await user.save();
@@ -49,6 +60,7 @@ export const googleAuth = async (req: Request, res: Response) => {
         isNewUser: false
       }, 'Login successful');
     } else {
+      console.log('New user, sending to onboarding:', email);
       // Check if email exists (shouldn't happen with Google)
       const existingEmail = await User.findOne({ email });
       if (existingEmail) {
@@ -63,8 +75,13 @@ export const googleAuth = async (req: Request, res: Response) => {
         isNewUser: true
       }, 'New user, needs onboarding');
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Google auth error:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return sendServerError(res, error);
   }
 };
