@@ -74,7 +74,7 @@ export default function MatchCard({
               <img
                 src={photos[currentPhotoIndex] || photos[0]}
                 alt="Match"
-                className={`w-full h-full object-cover transition-all duration-300 ${isRevealed ? '' : 'blur-md scale-105'}`}
+                className="w-full h-full object-cover transition-all duration-300"
               />
               
               {/* Photo navigation */}

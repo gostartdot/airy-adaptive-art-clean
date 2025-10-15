@@ -17,11 +17,11 @@ export const initSocket = (token: string): Socket => {
   });
 
   socket.on('connect', () => {
-    console.log('Socket connected:', socket?.id);
+    // Socket connected
   });
 
   socket.on('disconnect', () => {
-    console.log('Socket disconnected');
+    // Socket disconnected
   });
 
   socket.on('connect_error', (error: Error) => {
@@ -46,14 +46,12 @@ export const disconnectSocket = () => {
 export const joinRoom = (matchId: string) => {
   if (socket) {
     socket.emit('join-room', matchId);
-    console.log('Joined room:', matchId);
   }
 };
 
 export const leaveRoom = (matchId: string) => {
   if (socket) {
     socket.emit('leave-room', matchId);
-    console.log('Left room:', matchId);
   }
 };
 

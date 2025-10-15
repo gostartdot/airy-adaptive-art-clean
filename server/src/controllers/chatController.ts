@@ -7,6 +7,7 @@ import { AuthRequest } from '../middlewares/authMiddleware';
 import { sendSuccess, sendError, sendServerError } from '../utils/responseHelper';
 import { generatePersonaResponse, isAIPersona } from '../services/geminiService';
 import { getPersonaById, isAIPersonaId } from '../config/aiPersonas';
+import { getBlurredImageUrls } from '../utils/imageTransform';
 
 // Helper function to generate AI response
 async function generateAIResponse(
@@ -360,7 +361,7 @@ export const getConversations = async (req: AuthRequest, res: Response) => {
           otherUser: match.revealStatus.isRevealed ? otherUser : {
             _id: otherUser._id || otherUser.id,
             name: otherUser.name[0] + '***' + otherUser.name[otherUser.name.length - 1],
-            photos: otherUser.photos,
+            blurredPhotos: getBlurredImageUrls(otherUser.photos || []),
             age: otherUser.age
           },
           lastMessage,

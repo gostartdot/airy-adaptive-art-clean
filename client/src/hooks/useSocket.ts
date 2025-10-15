@@ -14,12 +14,10 @@ export const useSocket = () => {
       setSocket(socketInstance);
 
       const handleConnect = () => {
-        console.log('Socket connected via hook');
         setConnected(true);
       };
 
       const handleDisconnect = () => {
-        console.log('Socket disconnected via hook');
         setConnected(false);
       };
 

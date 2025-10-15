@@ -7,6 +7,7 @@ import { AuthRequest } from '../middlewares/authMiddleware';
 import { sendSuccess, sendError, sendServerError } from '../utils/responseHelper';
 import mongoose from 'mongoose';
 import { getRandomPersona, isAIPersonaId, getPersonaById } from '../config/aiPersonas';
+import { getBlurredImageUrls } from '../utils/imageTransform';
 
 // Helper function to mask name
 const maskName = (name: string): string => {
@@ -174,12 +175,14 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
     await deductCredits(userId, 'find_match', 1, (match._id as mongoose.Types.ObjectId).toString());
 
     // Create anonymous profile for response
+    // SECURITY: Use server-side blurred image URLs to prevent DOM inspection bypass
+    // The blurred URLs contain Cloudinary transformations that cannot be removed by users
     const anonymousProfile = {
       _id: randomMatch._id,
       matchId: match._id,
       maskedName: maskName(randomMatch.name),
       age: randomMatch.age,
-      blurredPhotos: randomMatch.photos,
+      blurredPhotos: getBlurredImageUrls(randomMatch.photos || []),
       bio: randomMatch.bio,
       interests: randomMatch.interests,
       city: randomMatch.city,
@@ -251,7 +254,19 @@ export const requestReveal = async (req: AuthRequest, res: Response) => {
       return sendError(res, 'Unauthorized', 403);
     }
 
-    // Deduct credits
+    // Check if user has already requested reveal
+    const alreadyRequested = isUser1 ? match.revealStatus.user1Requested : match.revealStatus.user2Requested;
+    
+    if (alreadyRequested) {
+      return sendError(res, 'You have already requested to reveal this profile', 400);
+    }
+
+    // Check if already revealed
+    if (match.revealStatus.isRevealed) {
+      return sendError(res, 'Profiles are already revealed', 400);
+    }
+
+    // Deduct credits (only after all checks pass)
     await deductCredits(userId, 'request_reveal', 1, matchId);
 
     // Update reveal request
@@ -405,7 +420,7 @@ export const getMatches = async (req: AuthRequest, res: Response) => {
             _id: otherUser._id || otherUser.id,
             maskedName: maskName(otherUser.name),
             age: otherUser.age,
-            blurredPhotos: otherUser.photos,
+            blurredPhotos: getBlurredImageUrls(otherUser.photos || []),
             bio: otherUser.bio,
             interests: otherUser.interests,
             city: otherUser.city
@@ -487,7 +502,7 @@ export const getMatch = async (req: AuthRequest, res: Response) => {
           _id: otherUser._id || otherUser.id,
           maskedName: maskName(otherUser.name),
           age: otherUser.age,
-          blurredPhotos: otherUser.photos,
+          blurredPhotos: getBlurredImageUrls(otherUser.photos || []),
           bio: otherUser.bio,
           interests: otherUser.interests,
           city: otherUser.city

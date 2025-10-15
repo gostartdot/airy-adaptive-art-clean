@@ -49,18 +49,9 @@ export default function Home() {
 
           const shouldShow = theyRequested && !youRequested && !isRevealed;
 
-          console.log("Match:", match._id, {
-            isUser1,
-            youRequested,
-            theyRequested,
-            isRevealed,
-            shouldShow,
-          });
-
           return shouldShow;
         });
 
-        console.log(`Found ${pending.length} pending reveal requests`);
         setPendingRevealRequests(pending);
       }
     } catch (error) {
@@ -202,6 +193,12 @@ export default function Home() {
     const photos = isRevealed
       ? currentMatch.photos || currentMatch.blurredPhotos
       : currentMatch.blurredPhotos;
+    
+    // Check if user has already requested reveal
+    const userIsUser1 = currentMatch.user1Id === user?._id;
+    const alreadyRequested = userIsUser1 
+      ? currentMatch.revealStatus?.user1Requested 
+      : currentMatch.revealStatus?.user2Requested;
 
     return (
       <div className="bg-white/10 backdrop-blur-xl rounded-3xl overflow-hidden max-w-md w-full border border-white/20 shadow-2xl">
@@ -250,9 +247,7 @@ export default function Home() {
           <img
             src={photos[0]}
             alt="Match"
-            className={`w-full h-full object-cover transition-all duration-500 ${
-              isRevealed ? "" : "blur-lg scale-110"
-            }`}
+            className="w-full h-full object-cover transition-all duration-500"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
           <div className="absolute bottom-6 left-6 right-6">
@@ -346,10 +341,15 @@ export default function Home() {
               </button>
               <button
                 onClick={handleRequestReveal}
-                className="flex-1 px-6 py-3.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-purple-500/50 flex items-center justify-center gap-2"
+                disabled={alreadyRequested}
+                className={`flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${
+                  alreadyRequested
+                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 cursor-not-allowed opacity-60'
+                    : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 hover:shadow-purple-500/50'
+                }`}
               >
-                <span className="text-lg">💜</span>
-                Reveal (1 💎)
+                <span className="text-lg">{alreadyRequested ? '⏳' : '💜'}</span>
+                {alreadyRequested ? 'Request Sent' : 'Reveal (1 💎)'}
               </button>
             </div>
           )}

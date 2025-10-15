@@ -56,28 +56,22 @@ export default function Chat() {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("Socket connected:", socket.id);
       setConnected(true);
 
       if (matchId) {
         socket.emit("join-room", matchId);
-        console.log("Joined room:", matchId);
       }
     });
 
     socket.on("disconnect", () => {
-      console.log("Socket disconnected");
       setConnected(false);
     });
 
     socket.on("receive-message", (message: any) => {
-      console.log("Received message:", message);
       setMessages((prev) => {
         if (prev.some((m) => m._id === message._id)) {
-          console.log("Duplicate message, skipping");
           return prev;
         }
-        console.log("Adding message to state, new count:", prev.length + 1);
         return [...prev, message];
       });
     });
@@ -113,7 +107,6 @@ export default function Chat() {
     if (!matchId) return;
     try {
       const result = await matchService.getMatch(matchId);
-      console.log(result);
       if (result.success) {
         setMatchData(result.data);
       }
@@ -180,6 +173,17 @@ export default function Chat() {
 
     if (matchData.isRevealed) {
       alert("Profile is already revealed!");
+      return;
+    }
+
+    // Check if user has already requested reveal
+    const userIsUser1 = matchData.user1Id === user?._id;
+    const alreadyRequested = userIsUser1 
+      ? matchData.revealStatus?.user1Requested 
+      : matchData.revealStatus?.user2Requested;
+    
+    if (alreadyRequested) {
+      alert("You have already requested to reveal this profile. Waiting for their response.");
       return;
     }
 
@@ -301,19 +305,31 @@ export default function Chat() {
               </button>
 
               {/* Request Reveal Button */}
-              {matchData && !matchData.isRevealed && (
-                <button
-                  onClick={handleRequestReveal}
-                  className="px-3 py-2 bg-purple-500/20 backdrop-blur-sm rounded-lg flex items-center gap-2 text-purple-300 hover:bg-purple-500/30 transition border border-purple-400/30 text-sm font-medium"
-                  title="Request Reveal (1 credit)"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  <span className="hidden sm:inline">Reveal</span>
-                </button>
-              )}
+              {matchData && !matchData.isRevealed && (() => {
+                const userIsUser1 = matchData.user1Id === user?._id;
+                const alreadyRequested = userIsUser1 
+                  ? matchData.revealStatus?.user1Requested 
+                  : matchData.revealStatus?.user2Requested;
+                
+                return (
+                  <button
+                    onClick={handleRequestReveal}
+                    disabled={alreadyRequested}
+                    className={`px-3 py-2 backdrop-blur-sm rounded-lg flex items-center gap-2 text-sm font-medium border ${
+                      alreadyRequested
+                        ? 'bg-gray-600/20 text-gray-400 border-gray-500/30 cursor-not-allowed opacity-60'
+                        : 'bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border-purple-400/30'
+                    }`}
+                    title={alreadyRequested ? "Request already sent" : "Request Reveal (1 credit)"}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <span className="hidden sm:inline">{alreadyRequested ? 'Sent' : 'Reveal'}</span>
+                  </button>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -559,16 +575,34 @@ export default function Chat() {
               )}
 
               {/* Reveal Request Info */}
-              {!matchData.isRevealed && (
-                <div className="bg-slate-700/50 rounded-xl p-4 text-center">
-                  <p className="text-sm text-slate-300 mb-3">
-                    Want to see the full profile?
-                  </p>
-                  <button className="w-full px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all">
-                    Request Identity Reveal
-                  </button>
-                </div>
-              )}
+              {!matchData.isRevealed && (() => {
+                const userIsUser1 = matchData.user1Id === user?._id;
+                const alreadyRequested = userIsUser1 
+                  ? matchData.revealStatus?.user1Requested 
+                  : matchData.revealStatus?.user2Requested;
+                
+                return (
+                  <div className="bg-slate-700/50 rounded-xl p-4 text-center">
+                    <p className="text-sm text-slate-300 mb-3">
+                      Want to see the full profile?
+                    </p>
+                    <button 
+                      onClick={() => {
+                        setShowProfileModal(false);
+                        handleRequestReveal();
+                      }}
+                      disabled={alreadyRequested}
+                      className={`w-full px-4 py-2 rounded-lg font-semibold transition-all ${
+                        alreadyRequested
+                          ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 cursor-not-allowed opacity-60'
+                          : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
+                      }`}
+                    >
+                      {alreadyRequested ? '⏳ Request Already Sent' : '💜 Request Identity Reveal (1 💎)'}
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -701,13 +735,19 @@ function ConversationsList() {
               <div className="flex items-center gap-4">
                 <div className="relative flex-shrink-0">
                   <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-white/20">
-                    <img
-                      src={conv.otherUser.photos?.[0] || ""}
-                      alt="Match"
-                      className={`w-full h-full object-cover ${
-                        conv.isAnonymous ? "blur-sm scale-110" : ""
-                      }`}
-                    />
+                    {(conv.isAnonymous ? conv.otherUser.blurredPhotos?.[0] : conv.otherUser.photos?.[0]) ? (
+                      <img
+                        src={conv.isAnonymous ? conv.otherUser.blurredPhotos?.[0] : conv.otherUser.photos?.[0]}
+                        alt="Match"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
+                        <span className="text-white text-2xl font-bold">
+                          {conv.otherUser.name?.[0]?.toUpperCase() || "?"}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   {conv.unreadCount > 0 && (
                     <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-slate-900 shadow-lg">
