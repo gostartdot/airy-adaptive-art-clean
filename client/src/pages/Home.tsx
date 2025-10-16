@@ -59,24 +59,25 @@ export default function Home() {
     }
   };
 
-  const handleFindMatch = async () => {
-    if (credits < CREDIT_COSTS.FIND_MATCH) {
+  const handleFindMatch = async (currentCredits?: number) => {
+    const creditsToUse = currentCredits ?? credits;
+    
+    if (creditsToUse < CREDIT_COSTS.FIND_MATCH) {
       setShowOutOfCredits(true);
       return;
     }
-
+  
     try {
       setLoading(true);
       setShowMatchingModal(true);
       
-      // Add a small delay for better UX
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       const result = await matchService.findMatch();
-
+  
       if (result.success) {
         setCurrentMatch(result.data);
-        setCredits(credits - CREDIT_COSTS.FIND_MATCH);
+        setCredits(creditsToUse - CREDIT_COSTS.FIND_MATCH);
       }
     } catch (error: any) {
       alert(error.response?.data?.error || "Failed to find match");
@@ -85,15 +86,15 @@ export default function Home() {
       setShowMatchingModal(false);
     }
   };
-
+  
   const handleSkip = async () => {
     if (!currentMatch) return;
-
+  
     if (credits < CREDIT_COSTS.SKIP_MATCH) {
       setShowOutOfCredits(true);
       return;
     }
-
+  
     if (
       !confirm(
         "Skip this match? You will lose 1 credit and won't see this profile again."
@@ -101,12 +102,17 @@ export default function Home() {
     ) {
       return;
     }
-
+  
     try {
       await matchService.skipMatch(currentMatch.matchId);
-      setCredits(credits - CREDIT_COSTS.SKIP_MATCH);
+      
+      // Calculate the new credit amount after skip
+      const creditsAfterSkip = credits - CREDIT_COSTS.SKIP_MATCH;
+      setCredits(creditsAfterSkip);
       setCurrentMatch(null);
-      handleFindMatch();
+      
+      // Pass the updated credits to handleFindMatch
+      handleFindMatch(creditsAfterSkip);
     } catch (error: any) {
       alert(error.response?.data?.error || "Failed to skip match");
     }
@@ -334,23 +340,35 @@ export default function Home() {
             <div className="flex gap-3">
               <button
                 onClick={handleSkip}
-                className="flex-1 px-6 py-3.5 bg-white/5 border-2 border-red-400/50 text-red-300 rounded-xl font-semibold hover:bg-red-500/10 hover:border-red-400 transition-all backdrop-blur-sm flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-2 sm:px-6 py-2.5 sm:py-3.5 
+                      bg-white/5 border-2 border-red-400/50 text-red-300 
+                      rounded-lg sm:rounded-xl font-semibold 
+                      hover:bg-red-500/10 hover:border-red-400 
+                      transition-all backdrop-blur-sm 
+                      flex items-center justify-center sm:gap-2 gap-1
+                      text-sm sm:text-base"
               >
-                <span className="text-lg">✕</span>
+                <span className="text-base sm:text-lg">✕</span>
                 Skip (1 💎)
               </button>
+
               <button
-                onClick={handleRequestReveal}
-                disabled={alreadyRequested}
-                className={`flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all shadow-lg flex items-center justify-center gap-2 ${
-                  alreadyRequested
-                    ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 cursor-not-allowed opacity-60'
-                    : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 hover:shadow-purple-500/50'
-                }`}
-              >
-                <span className="text-lg">{alreadyRequested ? '⏳' : '💜'}</span>
-                {alreadyRequested ? 'Request Sent' : 'Reveal (1 💎)'}
-              </button>
+              onClick={handleRequestReveal}
+              disabled={alreadyRequested}
+              className={`w-full sm:w-auto px-2 sm:px-6 py-2.5 sm:py-3.5 
+                          rounded-lg sm:rounded-xl font-semibold transition-all 
+                          shadow-md sm:shadow-lg flex items-center justify-center sm:gap-2 gap-1
+                          text-sm sm:text-base 
+                          ${
+                            alreadyRequested
+                              ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 cursor-not-allowed opacity-60'
+                              : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 hover:shadow-purple-500/40'
+                          }`}
+            >
+              <span className="text-base sm:text-lg">{alreadyRequested ? '⏳' : '💜'}</span>
+              {alreadyRequested ? 'Request Sent' : 'Reveal (1 💎)'}
+            </button>
+
             </div>
           )}
 
@@ -456,7 +474,7 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <div className="relative z-10 top-4 flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4 py-20">
+      <div className="relative z-10 top-4 flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4 pt-20 pb-30">
         {!currentMatch ? (
           <div className="text-center max-w-lg">
             <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-purple-500/50">
@@ -502,7 +520,7 @@ export default function Home() {
             )}
 
             {/* Tips */}
-            <div className="mt-12 p-6 bg-white/5 backdrop-blur-xl rounded-2xl text-left border border-white/10">
+            <div className="mt-8 p-6 bg-white/5 backdrop-blur-xl rounded-2xl text-left border border-white/10">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
                   <span className="text-xl">💡</span>

@@ -170,7 +170,7 @@ function LandingContent() {
       {/* Floating Nav */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrollY > 50
+          scrollY > 30
             ? "bg-black/20 backdrop-blur-xl border-b border-white/10"
             : ""
         }`}
@@ -230,7 +230,7 @@ function LandingContent() {
           />
         </div>
 
-        <div className="relative z-10 max-w-6xl mx-auto text-center pt-16 sm:pt-20">
+        <div className="relative z-10 max-w-6xl mx-auto text-center pt-24 sm:pt-20">
           <div className="mb-6 sm:mb-8">
             <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-purple-300 text-sm font-medium border border-white/20">
               Secure, Trustworthy, And Real Ties
@@ -267,11 +267,11 @@ function LandingContent() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 max-w-4xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-8 max-w-4xl mx-auto px-4">
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 sm:p-6 border border-white/10"
+                className="bg-white/5 backdrop-blur-sm rounded-2xl px-2 py-3 sm:p-6 border border-white/10"
               >
                 <div className="text-xl  sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
                   {stat.value}

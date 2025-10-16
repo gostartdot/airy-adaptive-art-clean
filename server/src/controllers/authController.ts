@@ -4,6 +4,7 @@ import User from '../models/User';
 import { generateToken } from '../utils/generateToken';
 import { sendSuccess, sendError, sendServerError } from '../utils/responseHelper';
 import { AuthRequest } from '../middlewares/authMiddleware';
+import cloudinary from '../config/cloudinary';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -82,6 +83,33 @@ export const googleAuth = async (req: Request, res: Response) => {
       stack: error.stack,
       name: error.name
     });
+    return sendServerError(res, error);
+  }
+};
+
+// @desc    Upload onboarding photo to Cloudinary
+// @route   POST /api/auth/upload-onboarding-photo
+// @access  Public (no auth required during onboarding)
+export const uploadOnboardingPhoto = async (req: Request, res: Response) => {
+  try {
+    const { photo } = req.body; // Base64 encoded image
+
+    if (!photo) {
+      return sendError(res, 'No photo provided');
+    }
+
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(photo, {
+      folder: 'start-dating-app/profiles',
+      transformation: [
+        { width: 800, height: 1000, crop: 'fill' },
+        { quality: 'auto' }
+      ]
+    });
+
+    return sendSuccess(res, { photoUrl: result.secure_url }, 'Photo uploaded');
+  } catch (error) {
+    console.error('Onboarding photo upload error:', error);
     return sendServerError(res, error);
   }
 };

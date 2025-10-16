@@ -361,13 +361,36 @@ export default function Onboarding() {
     }
 
     try {
+      setLoading(true);
+      
+      // Compress image to base64
       const compressedBase64 = await compressImage(file);
+      
+      // Upload to Cloudinary via API
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/upload-onboarding-photo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ photo: compressedBase64 }),
+      });
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to upload photo');
+      }
+
+      // Store Cloudinary URL instead of base64
       const newPhotos = [...formData.photos];
-      newPhotos[index] = compressedBase64;
+      newPhotos[index] = result.data.photoUrl;
       setFormData({ ...formData, photos: newPhotos });
+      
     } catch (error) {
-      console.error('Error compressing image:', error);
-      alert('Failed to process image. Please try another photo.');
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try another photo.');
+    } finally {
+      setLoading(false);
     }
   };
 
