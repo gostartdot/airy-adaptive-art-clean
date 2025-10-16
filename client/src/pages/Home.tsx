@@ -117,7 +117,7 @@ export default function Home() {
     // Ensure we always have a valid number
     const creditsToUse = typeof currentCredits === 'number' ? currentCredits : credits;
     
-    console.log('Finding match with credits:', creditsToUse); // Debug log
+    //console.log('Finding match with credits:', creditsToUse); // Debug log
     
     if (creditsToUse < CREDIT_COSTS.FIND_MATCH) {
       setShowOutOfCredits(true);
@@ -135,7 +135,7 @@ export default function Home() {
       if (result.success) {
         setCurrentMatch(result.data);
         const newCredits = creditsToUse - CREDIT_COSTS.FIND_MATCH;
-        console.log('Setting credits after match:', newCredits); // Debug log
+        //console.log('Setting credits after match:', newCredits); // Debug log
         setCredits(newCredits);
       }
     } catch (error: any) {
@@ -149,7 +149,7 @@ export default function Home() {
   const handleSkip = async () => {
     if (!currentMatch) return;
   
-    console.log('Current credits before skip:', credits); // Debug log
+    //console.log('Current credits before skip:', credits); // Debug log
   
     if (credits < CREDIT_COSTS.SKIP_MATCH) {
       setShowOutOfCredits(true);
@@ -169,7 +169,7 @@ export default function Home() {
       
       // Calculate the new credit amount after skip
       const creditsAfterSkip = credits - CREDIT_COSTS.SKIP_MATCH;
-      console.log('Credits after skip:', creditsAfterSkip); // Debug log
+      //console.log('Credits after skip:', creditsAfterSkip); // Debug log
       
       setCredits(creditsAfterSkip);
       setCurrentMatch(null);

@@ -53,7 +53,7 @@ When clicking on a user's name in the chat page, a profile modal appears. Inside
             : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
         }`}
       >
-        {alreadyRequested ? '⏳ Request Already Sent' : '💜 Request Identity Reveal (1 💎)'}
+        {alreadyRequested ? matchData.status == "revealed" ? "Reveal Request Accepted":'⏳ Request Already Sent' : '💜 Request Identity Reveal (1 💎)'}
       </button>
     </div>
   );

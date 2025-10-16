@@ -50,14 +50,14 @@ export default function Chat() {
       return;
     }
 
-    console.log('🔌 Setting up socket connection...');
+    //console.log('🔌 Setting up socket connection...');
 
     // Initialize socket (will reuse existing connection if available)
     const socket = socketService.initSocket(token);
 
     // Update connection status
     const handleConnect = () => {
-      console.log('✅ Socket connected in Chat component');
+      //console.log('✅ Socket connected in Chat component');
       setConnected(true);
     };
 
@@ -97,7 +97,7 @@ export default function Chat() {
 
     // Join room when matchId changes or socket connects
     const joinRoomHandler = () => {
-      console.log('🚪 Joining room:', matchId);
+      //console.log('🚪 Joining room:', matchId);
       socketService.joinRoom(matchId);
     };
 
@@ -109,7 +109,7 @@ export default function Chat() {
 
     // Set up message handler
     messageHandlerRef.current = (message: any) => {
-      console.log('📩 Received message:', message);
+      //console.log('📩 Received message:', message);
       setMessages((prev) => {
         // Remove any temp message with same content from same sender
         const filtered = prev.filter(m => {
@@ -143,14 +143,14 @@ export default function Chat() {
     // Listen for reveal status updates
     const handleRevealStatusUpdate = (data: any) => {
       if (data.matchId === matchId) {
-        console.log("Reveal status updated:", data);
+        //console.log("Reveal status updated:", data);
         fetchMatchData();
       }
     };
 
     const handleProfileRevealed = (data: any) => {
       if (data.matchId === matchId) {
-        console.log("Profile revealed:", data);
+        //console.log("Profile revealed:", data);
         fetchMatchData();
         alert("🎉 Profiles revealed! You can now see each other's full details.");
       }
@@ -161,7 +161,7 @@ export default function Chat() {
 
     // Cleanup
     return () => {
-      console.log('🧹 Cleaning up socket listeners for matchId:', matchId);
+      //console.log('🧹 Cleaning up socket listeners for matchId:', matchId);
       
       if (messageHandlerRef.current) {
         socket.off("receive-message", messageHandlerRef.current);
@@ -171,7 +171,7 @@ export default function Chat() {
       socket.off('connect', joinRoomHandler);
       
       // Leave room
-      console.log('🚪 Leaving room:', matchId);
+      //console.log('🚪 Leaving room:', matchId);
       socketService.leaveRoom(matchId);
     };
   }, [matchId]);
@@ -200,7 +200,7 @@ export default function Chat() {
     try {
       const result = await matchService.getMatch(matchId);
       if (result.success) {
-        console.log("Match data fetched:", result.data);
+        //console.log("Match data fetched:", result.data);
         setMatchData(result.data);
       }
     } catch (error) {
@@ -257,6 +257,7 @@ export default function Chat() {
       alert(error.response?.data?.error || "Failed to skip match");
     }
   };
+  //console.log("matchData: ", matchData);
 
   const handleRequestReveal = async () => {
     if (!matchId || !matchData) return;
@@ -620,11 +621,11 @@ export default function Chat() {
               )}
 
               {matchData.otherUser?.bio && (
-                <div className="bg-slate-700/50 rounded-xl p-4">
+                <div className="bg-slate-700/50 rounded-xl p-4 max-h-[200px] sm:max-h-[250px] md:max-h-[300px] overflow-y-auto custom-scrollbar">
                   <h4 className="text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
                     Bio
                   </h4>
-                  <p className="text-white/90 text-sm leading-relaxed">
+                  <p className="text-white/90 text-sm leading-relaxed break-words whitespace-pre-wrap">
                     {matchData.isRevealed
                       ? matchData.otherUser.bio
                       : matchData.otherUser.bio.length > 100
@@ -633,6 +634,7 @@ export default function Chat() {
                   </p>
                 </div>
               )}
+
 
               {matchData.otherUser?.interests &&
                 matchData.otherUser.interests.length > 0 && (
@@ -715,7 +717,7 @@ export default function Chat() {
                           : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600'
                       }`}
                     >
-                      {alreadyRequested ? '⏳ Request Already Sent' : '💜 Request Identity Reveal (1 💎)'}
+                      {alreadyRequested ? matchData.status == "revealed" ? "Reveal Request Accepted":'⏳ Request Already Sent' : '💜 Request Identity Reveal (1 💎)'}
                     </button>
                   </div>
                 );
@@ -808,7 +810,7 @@ function ConversationsList() {
         </div>
       </div>
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-3">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 pt-6 mb-24 space-y-3">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">

@@ -2,17 +2,17 @@ import { io, Socket } from 'socket.io-client';
 
 const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
-console.log('🔌 Socket URL:', SOCKET_URL);
+//console.log('🔌 Socket URL:', SOCKET_URL);
 
 let socket: Socket | null = null;
 
 export const initSocket = (token: string): Socket => {
   if (socket && socket.connected) {
-    console.log('✅ Socket already connected');
+    //console.log('✅ Socket already connected');
     return socket;
   }
 
-  console.log('🔄 Initializing socket connection...');
+  //console.log('🔄 Initializing socket connection...');
   
   socket = io(SOCKET_URL, {
     auth: { token },
@@ -28,7 +28,7 @@ export const initSocket = (token: string): Socket => {
   });
 
   socket.on('connect', () => {
-    console.log('✅ Socket connected:', socket?.id);
+    //console.log('✅ Socket connected:', socket?.id);
   });
 
   socket.on('disconnect', (reason) => {

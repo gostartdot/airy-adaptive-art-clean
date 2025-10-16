@@ -684,14 +684,17 @@ export default function Profile() {
 
         {/* Bio */}
         {user?.bio && (
-          <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6">
-            <h3 className="font-semibold text-white text-lg mb-3 flex items-center gap-2">
-              <span className="text-xl">✍️</span>
-              Bio
-            </h3>
-            <p className="text-white/80 leading-relaxed">{user.bio}</p>
-          </div>
-        )}
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl border border-white/10 p-6 max-h-[250px] sm:max-h-[300px] md:max-h-[400px] overflow-y-auto custom-scrollbar">
+              <h3 className="font-semibold text-white text-lg mb-3 flex items-center gap-2">
+                <span className="text-xl">✍️</span>
+                Bio
+              </h3>
+              <p className="text-white/80 leading-relaxed break-words whitespace-pre-wrap">
+                {user.bio}
+              </p>
+            </div>
+          )}
+
 
         {/* Interests */}
         {user?.interests && user.interests.length > 0 && (
