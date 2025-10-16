@@ -17,23 +17,42 @@ const allowedOrigins = [
   'http://localhost:5174',
   'http://localhost:5173',
   'https://gostart.live',
-  'https://www.gostart.live'
+  'https://www.gostart.live',
+  // CRITICAL: Add your DigitalOcean backend URL for self-connection
+  'https://clownfish-app-da38q.ondigitalocean.app',
+  // Also allow without protocol for various client configurations
+  process.env.BACKEND_URL
 ].filter(Boolean);
 
 // Create HTTP server
 const httpServer = createServer(app);
 
-// Initialize Socket.IO with multiple origins support
+// Initialize Socket.IO - DEBUG VERSION with extensive logging
 const io = new Server(httpServer, {
   cors: {
     origin: function(origin, callback) {
-      // Allow requests with no origin (like mobile apps)
-      if (!origin) return callback(null, true);
+      console.log('🔍 Socket.IO CORS check - Origin:', origin);
       
-      if (allowedOrigins.indexOf(origin) === -1 && process.env.NODE_ENV === 'production') {
-        return callback(new Error('CORS not allowed for Socket.IO'), false);
+      // Allow requests with no origin (mobile apps)
+      if (!origin) {
+        console.log('✅ No origin - allowing');
+        return callback(null, true);
       }
-      return callback(null, true);
+      
+      // In development, allow localhost
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('✅ Development mode - allowing');
+        return callback(null, true);
+      }
+      
+      // Check against allowed origins
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        console.log('✅ Origin in allowed list - allowing');
+        return callback(null, true);
+      }
+      
+      console.log('❌ Origin NOT allowed. Allowed origins:', allowedOrigins);
+      return callback(new Error('CORS not allowed'), false);
     },
     methods: ['GET', 'POST'],
     credentials: true
@@ -43,6 +62,15 @@ const io = new Server(httpServer, {
   allowEIO3: true,
   pingTimeout: 60000,
   pingInterval: 25000
+});
+
+// Log all connection attempts
+io.engine.on("connection_error", (err) => {
+  console.error('❌ Socket.IO Connection Error:', {
+    code: err.code,
+    message: err.message,
+    context: err.context
+  });
 });
 
 // Initialize socket handlers

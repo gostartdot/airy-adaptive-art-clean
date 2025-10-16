@@ -26,48 +26,66 @@ export default function Chat() {
   const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (matchId) {
-      fetchMessages();
-      fetchMatchData();
-      fetchCredits();
-    }
-  }, [matchId]);
-
-  const fetchCredits = async () => {
-    try {
-      const result = await creditService.getBalance();
-      if (result.success) {
-        setCredits(result.data.credits);
+    useEffect(() => {
+      if (matchId) {
+        fetchMessages();
+        fetchMatchData();
+        fetchCredits();
       }
-    } catch (error) {
-      console.error("Error fetching credits:", error);
-    }
-  };
+    }, [matchId]);
+
+    const fetchCredits = async () => {
+      try {
+        const result = await creditService.getBalance();
+        if (result.success) {
+          setCredits(result.data.credits);
+        }
+      } catch (error) {
+        console.error("Error fetching credits:", error);
+      }
+    };
+
+    // Replace the socket connection useEffect in your Chat component with this:
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
+    console.log('🔌 Connecting socket with token...');
+
     const socket = io(SOCKET_URL, {
       auth: { token },
+      transports: ['websocket', 'polling'], // CRITICAL: Add this
+      withCredentials: true, // CRITICAL: Add this
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5,
     });
 
     socketRef.current = socket;
 
     socket.on("connect", () => {
+      console.log('✅ Socket connected:', socket.id);
       setConnected(true);
 
       if (matchId) {
+        console.log('🚪 Joining room:', matchId);
         socket.emit("join-room", matchId);
       }
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", (reason) => {
+      console.log('❌ Socket disconnected:', reason);
       setConnected(false);
     });
 
+    socket.on("connect_error", (error) => {
+      console.error('❌ Socket connection error:', error.message);
+      console.error('Full error:', error);
+    });
+
     socket.on("receive-message", (message: any) => {
+      console.log('📩 Received message:', message);
       setMessages((prev) => {
         if (prev.some((m) => m._id === message._id)) {
           return prev;
@@ -80,7 +98,6 @@ export default function Chat() {
     socket.on("reveal-status-updated", (data: any) => {
       if (data.matchId === matchId) {
         console.log("Reveal status updated:", data);
-        // Refresh match data to get latest reveal status
         fetchMatchData();
       }
     });
@@ -89,7 +106,6 @@ export default function Chat() {
     socket.on("profile-revealed", (data: any) => {
       if (data.matchId === matchId) {
         console.log("Profile revealed:", data);
-        // Refresh match data to show full details
         fetchMatchData();
         alert("🎉 Profiles revealed! You can now see each other's full details.");
       }
@@ -97,8 +113,10 @@ export default function Chat() {
 
     return () => {
       if (matchId) {
+        console.log('🚪 Leaving room:', matchId);
         socket.emit("leave-room", matchId);
       }
+      console.log('👋 Disconnecting socket');
       socket.disconnect();
     };
   }, [matchId]);
