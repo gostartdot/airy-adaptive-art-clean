@@ -37,7 +37,7 @@ export const initSocket = (token: string): Socket => {
 
   socket.on('connect_error', (error: Error) => {
     console.error('❌ Socket connection error:', error.message);
-    console.error('Full error:', error);
+    console.error('Full errors:', error);
   });
 
   socket.on('reconnect_attempt', (attemptNumber) => {
