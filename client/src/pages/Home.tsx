@@ -551,7 +551,7 @@ export default function Home() {
               Click below to discover someone special
             </p>
             <button
-              onClick={handleFindMatch}
+              onClick={() => handleFindMatch()}
               disabled={loading || credits < CREDIT_COSTS.FIND_MATCH}
               className="px-10 py-5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl text-xl font-semibold hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-2xl hover:shadow-purple-500/50 disabled:transform-none flex items-center gap-3 mx-auto"
             >
