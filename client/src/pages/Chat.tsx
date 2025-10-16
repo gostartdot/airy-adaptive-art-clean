@@ -1,15 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { io, Socket } from "socket.io-client";
 import { chatService } from "../services/chatService";
 import { matchService } from "../services/matchService";
 import { creditService } from "../services/creditService";
 import { useAuth } from "../store/useAuthStore";
 import { formatTime } from "../utils/formatDate";
 import { CREDIT_COSTS } from "../utils/constants";
-
-const SOCKET_URL =
-  import.meta.env.VITE_API_URL?.replace("/api", "") || "http://localhost:5000";
+import socketService from "../socket/socket";
 
 export default function Chat() {
   const { matchId } = useParams();
@@ -23,101 +20,159 @@ export default function Chat() {
   const [matchData, setMatchData] = useState<any>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [credits, setCredits] = useState(0);
-  const socketRef = useRef<Socket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-      if (matchId) {
-        fetchMessages();
-        fetchMatchData();
-        fetchCredits();
-      }
-    }, [matchId]);
-
-    const fetchCredits = async () => {
-      try {
-        const result = await creditService.getBalance();
-        if (result.success) {
-          setCredits(result.data.credits);
-        }
-      } catch (error) {
-        console.error("Error fetching credits:", error);
-      }
-    };
-
-    // Replace the socket connection useEffect in your Chat component with this:
+  const messageHandlerRef = useRef<((message: any) => void) | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+    if (matchId) {
+      fetchMessages();
+      fetchMatchData();
+      fetchCredits();
+    }
+  }, [matchId]);
 
-    console.log('🔌 Connecting socket with token...');
-
-    const socket = io(SOCKET_URL, {
-      auth: { token },
-      transports: ['websocket', 'polling'], // CRITICAL: Add this
-      withCredentials: true, // CRITICAL: Add this
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionAttempts: 5,
-    });
-
-    socketRef.current = socket;
-
-    socket.on("connect", () => {
-      console.log('✅ Socket connected:', socket.id);
-      setConnected(true);
-
-      if (matchId) {
-        console.log('🚪 Joining room:', matchId);
-        socket.emit("join-room", matchId);
+  const fetchCredits = async () => {
+    try {
+      const result = await creditService.getBalance();
+      if (result.success) {
+        setCredits(result.data.credits);
       }
-    });
+    } catch (error) {
+      console.error("Error fetching credits:", error);
+    }
+  };
 
-    socket.on("disconnect", (reason) => {
-      console.log('❌ Socket disconnected:', reason);
+  // Initialize socket connection
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("❌ No token found");
+      return;
+    }
+
+    console.log('🔌 Setting up socket connection...');
+
+    // Initialize socket (will reuse existing connection if available)
+    const socket = socketService.initSocket(token);
+
+    // Update connection status
+    const handleConnect = () => {
+      console.log('✅ Socket connected in Chat component');
+      setConnected(true);
+    };
+
+    const handleDisconnect = (reason: string) => {
+      console.log('❌ Socket disconnected in Chat component:', reason);
       setConnected(false);
-    });
+    };
 
-    socket.on("connect_error", (error) => {
-      console.error('❌ Socket connection error:', error.message);
-      console.error('Full error:', error);
-    });
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
 
-    socket.on("receive-message", (message: any) => {
+    // Set initial connection state
+    setConnected(socket.connected);
+
+    // Join room if we have a matchId
+    if (matchId && socket.connected) {
+      console.log('🚪 Joining room on mount:', matchId);
+      socketService.joinRoom(matchId);
+    }
+
+    // Cleanup
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+    };
+  }, []);
+
+  // Handle room changes and message listening
+  useEffect(() => {
+    if (!matchId) return;
+
+    const socket = socketService.getSocket();
+    if (!socket) {
+      console.error("❌ Socket not initialized");
+      return;
+    }
+
+    // Join room when matchId changes or socket connects
+    const joinRoomHandler = () => {
+      console.log('🚪 Joining room:', matchId);
+      socketService.joinRoom(matchId);
+    };
+
+    if (socket.connected) {
+      joinRoomHandler();
+    }
+
+    socket.on('connect', joinRoomHandler);
+
+    // Set up message handler
+    messageHandlerRef.current = (message: any) => {
       console.log('📩 Received message:', message);
       setMessages((prev) => {
-        if (prev.some((m) => m._id === message._id)) {
-          return prev;
+        // Remove any temp message with same content from same sender
+        const filtered = prev.filter(m => {
+          if (m.isTemp && m.content === message.content) {
+            const messageSenderId = typeof message.senderId === 'object' 
+              ? message.senderId._id 
+              : message.senderId;
+            const tempSenderId = typeof m.senderId === 'object'
+              ? m.senderId._id
+              : m.senderId;
+            
+            if (messageSenderId === tempSenderId) {
+              return false; // Remove temp message
+            }
+          }
+          return true;
+        });
+        
+        // Check if real message already exists
+        if (filtered.some((m) => m._id === message._id)) {
+          return filtered;
         }
-        return [...prev, message];
+        
+        return [...filtered, message];
       });
-    });
+    };
+
+    // Listen for messages
+    socket.on("receive-message", messageHandlerRef.current);
 
     // Listen for reveal status updates
-    socket.on("reveal-status-updated", (data: any) => {
+    const handleRevealStatusUpdate = (data: any) => {
       if (data.matchId === matchId) {
         console.log("Reveal status updated:", data);
         fetchMatchData();
       }
-    });
+    };
 
-    // Listen for profile revealed event
-    socket.on("profile-revealed", (data: any) => {
+    const handleProfileRevealed = (data: any) => {
       if (data.matchId === matchId) {
         console.log("Profile revealed:", data);
         fetchMatchData();
         alert("🎉 Profiles revealed! You can now see each other's full details.");
       }
-    });
+    };
 
+    socket.on("reveal-status-updated", handleRevealStatusUpdate);
+    socket.on("profile-revealed", handleProfileRevealed);
+
+    // Cleanup
     return () => {
-      if (matchId) {
-        console.log('🚪 Leaving room:', matchId);
-        socket.emit("leave-room", matchId);
+      console.log('🧹 Cleaning up socket listeners for matchId:', matchId);
+      
+      if (messageHandlerRef.current) {
+        socket.off("receive-message", messageHandlerRef.current);
       }
-      console.log('👋 Disconnecting socket');
-      socket.disconnect();
+      socket.off("reveal-status-updated", handleRevealStatusUpdate);
+      socket.off("profile-revealed", handleProfileRevealed);
+      socket.off('connect', joinRoomHandler);
+      
+      // Leave room
+      console.log('🚪 Leaving room:', matchId);
+      socketService.leaveRoom(matchId);
     };
   }, [matchId]);
 
@@ -156,12 +211,10 @@ export default function Chat() {
   const getDisplayName = () => {
     if (!matchData || !matchData.otherUser) return "Anonymous";
     
-    // FIXED: If revealed, show the REAL full name from 'name' field
     if (matchData.isRevealed) {
       return matchData.otherUser.name || "Anonymous";
     }
     
-    // If NOT revealed, show masked version
     const maskedName = matchData.otherUser.maskedName || matchData.otherUser.name || "Anonymous";
     
     if (maskedName.length <= 3) {
@@ -213,7 +266,6 @@ export default function Chat() {
       return;
     }
 
-    // Check if user has already requested reveal
     const userIsUser1 = matchData.user1Id === user?._id;
     const alreadyRequested = userIsUser1 
       ? matchData.revealStatus?.user1Requested 
@@ -241,7 +293,6 @@ export default function Chat() {
       await matchService.requestReveal(matchId);
       setCredits(credits - CREDIT_COSTS.REQUEST_REVEAL);
       alert("✨ Reveal request sent! You can chat while waiting for their response.");
-      // Refresh match data to update UI
       fetchMatchData();
     } catch (error: any) {
       alert(error.response?.data?.error || "Failed to request reveal");
@@ -252,12 +303,39 @@ export default function Chat() {
     e.preventDefault();
     if (!newMessage.trim() || !matchId || sending) return;
 
+    const messageContent = newMessage.trim();
+    setNewMessage("");
+
     try {
       setSending(true);
-      await chatService.sendMessage(matchId, newMessage.trim());
-      setNewMessage("");
+      
+      // Optimistically add the message to UI
+      const tempMessage = {
+        _id: `temp-${Date.now()}`,
+        content: messageContent,
+        senderId: user?._id || '',
+        createdAt: new Date().toISOString(),
+        isTemp: true
+      };
+      
+      setMessages((prev) => [...prev, tempMessage]);
+
+      // Send to backend
+      const result = await chatService.sendMessage(matchId, messageContent);
+      
+      // Replace temp message with real one if response includes it
+      if (result?.data?._id) {
+        setMessages((prev) => 
+          prev.map(msg => 
+            msg._id === tempMessage._id ? result.data : msg
+          )
+        );
+      }
     } catch (error) {
       console.error("Error:", error);
+      setNewMessage(messageContent);
+      setMessages((prev) => prev.filter(msg => !msg.isTemp));
+      alert("Failed to send message. Please try again.");
     } finally {
       setSending(false);
     }
@@ -334,7 +412,6 @@ export default function Chat() {
           {/* Action Buttons */}
           {matchId && (
             <div className="flex items-center gap-2">
-              {/* Skip Button */}
               <button
                 onClick={handleSkipMatch}
                 className="px-3 py-2 bg-red-500/20 backdrop-blur-sm rounded-lg flex items-center gap-2 text-red-300 hover:bg-red-500/30 transition border border-red-400/30 text-sm font-medium"
@@ -346,7 +423,6 @@ export default function Chat() {
                 <span className="hidden sm:inline">Skip</span>
               </button>
 
-              {/* Request Reveal Button */}
               {matchData && !matchData.isRevealed && (() => {
                 const userIsUser1 = matchData.user1Id === user?._id;
                 const alreadyRequested = userIsUser1 
@@ -417,7 +493,7 @@ export default function Chat() {
                     isMe
                       ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
                       : "bg-white/10 backdrop-blur-xl text-white border border-white/20"
-                  }`}
+                  } ${message.isTemp ? 'opacity-70' : ''}`}
                 >
                   <p className="break-words">{message.content}</p>
                   <p
@@ -486,7 +562,6 @@ export default function Chat() {
             style={{ animation: "scaleIn 0.3s ease-out" }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
             <div className="relative mb-6">
               <h2 className="text-2xl font-bold text-white text-center">
                 {getDisplayName()}
@@ -512,9 +587,7 @@ export default function Chat() {
               </button>
             </div>
 
-            {/* Profile Content */}
             <div className="space-y-4">
-              {/* Avatar & Name */}
               <div className="flex flex-col items-center text-center">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-3xl font-bold shadow-xl mb-3">
                   {(matchData.isRevealed 
@@ -536,7 +609,6 @@ export default function Chat() {
                 )}
               </div>
 
-              {/* Limited Info Message */}
               {!matchData.isRevealed && (
                 <div className="bg-purple-500/10 border border-purple-400/30 rounded-xl p-4">
                   <p className="text-sm text-purple-200 text-center">
@@ -547,7 +619,6 @@ export default function Chat() {
                 </div>
               )}
 
-              {/* Bio */}
               {matchData.otherUser?.bio && (
                 <div className="bg-slate-700/50 rounded-xl p-4">
                   <h4 className="text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
@@ -563,7 +634,6 @@ export default function Chat() {
                 </div>
               )}
 
-              {/* Interests */}
               {matchData.otherUser?.interests &&
                 matchData.otherUser.interests.length > 0 && (
                   <div className="bg-slate-700/50 rounded-xl p-4">
@@ -592,7 +662,6 @@ export default function Chat() {
                   </div>
                 )}
 
-              {/* City - Show only if revealed */}
               {matchData.isRevealed && matchData.otherUser?.city && (
                 <div className="bg-slate-700/50 rounded-xl p-4">
                   <h4 className="text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
@@ -623,7 +692,6 @@ export default function Chat() {
                 </div>
               )}
 
-              {/* Reveal Request Info */}
               {!matchData.isRevealed && (() => {
                 const userIsUser1 = matchData.user1Id === user?._id;
                 const alreadyRequested = userIsUser1 
@@ -657,7 +725,6 @@ export default function Chat() {
         </div>
       )}
 
-      {/* Animations */}
       <style>{`
         @keyframes slide-up {
           from {
@@ -722,7 +789,6 @@ function ConversationsList() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
         <div
@@ -731,7 +797,6 @@ function ConversationsList() {
         />
       </div>
 
-      {/* Header */}
       <div className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-white/10 sticky top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
           <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
@@ -743,7 +808,6 @@ function ConversationsList() {
         </div>
       </div>
 
-      {/* Conversations List */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-3">
         {loading ? (
           <div className="flex items-center justify-center py-20">
@@ -839,7 +903,6 @@ function ConversationsList() {
         )}
       </div>
 
-      {/* Bottom Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-black/40 backdrop-blur-xl border-t border-white/10 px-4 py-3 z-20">
         <div className="max-w-md mx-auto flex justify-around">
           <button
