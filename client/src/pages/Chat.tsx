@@ -76,6 +76,25 @@ export default function Chat() {
       });
     });
 
+    // Listen for reveal status updates
+    socket.on("reveal-status-updated", (data: any) => {
+      if (data.matchId === matchId) {
+        console.log("Reveal status updated:", data);
+        // Refresh match data to get latest reveal status
+        fetchMatchData();
+      }
+    });
+
+    // Listen for profile revealed event
+    socket.on("profile-revealed", (data: any) => {
+      if (data.matchId === matchId) {
+        console.log("Profile revealed:", data);
+        // Refresh match data to show full details
+        fetchMatchData();
+        alert("🎉 Profiles revealed! You can now see each other's full details.");
+      }
+    });
+
     return () => {
       if (matchId) {
         socket.emit("leave-room", matchId);
@@ -108,6 +127,7 @@ export default function Chat() {
     try {
       const result = await matchService.getMatch(matchId);
       if (result.success) {
+        console.log("Match data fetched:", result.data);
         setMatchData(result.data);
       }
     } catch (error) {
@@ -116,24 +136,23 @@ export default function Chat() {
   };
 
   const getDisplayName = () => {
-    // if (!matchData || !matchData.otherUser?.name || !matchData.otherUser?.maskedName) return "Anonymous";
+    if (!matchData || !matchData.otherUser) return "Anonymous";
     
-    
-    const name = matchData.otherUser.maskedName || matchData.otherUser.name;
-    
-    // If revealed, show full name
+    // FIXED: If revealed, show the REAL full name from 'name' field
     if (matchData.isRevealed) {
-      return name;
+      return matchData.otherUser.name || "Anonymous";
     }
     
-    // If anonymous, show name with asterisks (e.g., "Aa**z" for "Aariz")
-    if (name.length <= 3) {
-      return name;
+    // If NOT revealed, show masked version
+    const maskedName = matchData.otherUser.maskedName || matchData.otherUser.name || "Anonymous";
+    
+    if (maskedName.length <= 3) {
+      return maskedName;
     }
     
-    const firstTwo = name.substring(0, 2);
-    const lastOne = name[name.length - 1];
-    const asterisks = "*".repeat(Math.max(name.length - 3, 2));
+    const firstTwo = maskedName.substring(0, 2);
+    const lastOne = maskedName[maskedName.length - 1];
+    const asterisks = "*".repeat(Math.max(maskedName.length - 3, 2));
     
     return `${firstTwo}${asterisks}${lastOne}`;
   };
@@ -204,7 +223,7 @@ export default function Chat() {
       await matchService.requestReveal(matchId);
       setCredits(credits - CREDIT_COSTS.REQUEST_REVEAL);
       alert("✨ Reveal request sent! You can chat while waiting for their response.");
-      // Refresh match data
+      // Refresh match data to update UI
       fetchMatchData();
     } catch (error: any) {
       alert(error.response?.data?.error || "Failed to request reveal");
@@ -270,6 +289,11 @@ export default function Chat() {
               {matchData && !matchData.isRevealed && (
                 <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full border border-purple-400/30">
                   🎭
+                </span>
+              )}
+              {matchData && matchData.isRevealed && (
+                <span className="text-xs bg-green-500/20 text-green-300 px-2 py-1 rounded-full border border-green-400/30">
+                  ✅ Revealed
                 </span>
               )}
             </div>
@@ -475,12 +499,19 @@ export default function Chat() {
               {/* Avatar & Name */}
               <div className="flex flex-col items-center text-center">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-3xl font-bold shadow-xl mb-3">
-                  {matchData.otherUser?.name?.[0]?.toUpperCase()}
+                  {(matchData.isRevealed 
+                    ? matchData.otherUser?.name?.[0] 
+                    : matchData.otherUser?.maskedName?.[0] || matchData.otherUser?.name?.[0]
+                  )?.toUpperCase() || "?"}
                 </div>
                 <h3 className="text-xl font-bold text-white mb-1">
                   {getDisplayName()}
                 </h3>
-                {!matchData.isRevealed && (
+                {matchData.isRevealed ? (
+                  <span className="text-xs bg-green-500/20 text-green-300 px-3 py-1 rounded-full border border-green-400/30">
+                    ✅ Identity Revealed
+                  </span>
+                ) : (
                   <span className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full border border-purple-400/30">
                     🎭 Anonymous Profile
                   </span>
@@ -498,7 +529,7 @@ export default function Chat() {
                 </div>
               )}
 
-              {/* Bio - Show if revealed or limited version */}
+              {/* Bio */}
               {matchData.otherUser?.bio && (
                 <div className="bg-slate-700/50 rounded-xl p-4">
                   <h4 className="text-sm font-semibold text-white/80 mb-2 uppercase tracking-wide">
@@ -514,7 +545,7 @@ export default function Chat() {
                 </div>
               )}
 
-              {/* Interests - Show limited or full */}
+              {/* Interests */}
               {matchData.otherUser?.interests &&
                 matchData.otherUser.interests.length > 0 && (
                   <div className="bg-slate-700/50 rounded-xl p-4">
@@ -704,7 +735,7 @@ function ConversationsList() {
             </div>
           </div>
         ) : conversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="flex flex-col items-center justify-center pb-20 text-center">
             <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 max-w-md">
               <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
                 <span className="text-5xl">💬</span>
