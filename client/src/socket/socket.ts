@@ -19,8 +19,9 @@ export const initSocket = (token: string): Socket => {
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionAttempts: 5,
-    // CRITICAL: Add these for production
-    transports: ['websocket', 'polling'],
+    // FORCE WEBSOCKET ONLY to avoid session issues
+    transports: ['websocket'],
+    upgrade: false, // Disable transport upgrade
     withCredentials: true,
     // Add timeout
     timeout: 10000,
