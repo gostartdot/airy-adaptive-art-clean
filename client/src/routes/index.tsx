@@ -7,7 +7,12 @@ import Profile from '../pages/Profile';
 import Terms from '../pages/Terms';
 import Privacy from '../pages/Privacy';
 import ProtectedRoute from './ProtectedRoute';
+import AdminProtectedRoute from './AdminProtectedRoute';
 import ScrollToTop from '../components/common/ScrollToTop';
+import Login from '../pages/Login';
+import Signup from '../pages/Signup';
+import VerifyEmailOtp from '../pages/VerifyEmailOtp';
+import Admin from '../pages/Admin';
 
 export default function AppRoutes() {
   return (
@@ -18,6 +23,16 @@ export default function AppRoutes() {
         <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+
+        {/* Admin Auth Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/verify-email" element={<VerifyEmailOtp />} />
+        
+        {/* Admin Protected Routes */}
+        <Route element={<AdminProtectedRoute />}>
+          <Route path="/admin" element={<Admin />} />
+        </Route>
         
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>

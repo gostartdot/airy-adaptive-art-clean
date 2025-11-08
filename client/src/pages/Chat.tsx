@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 import { chatService } from "../services/chatService";
 import { matchService } from "../services/matchService";
 import { creditService } from "../services/creditService";
@@ -12,6 +14,15 @@ export default function Chat() {
   const { matchId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  // Check if admin is logged in (from Redux store)
+  const { user: reduxUser, isAuthenticated: reduxAuthenticated } = useSelector((state: RootState) => state.auth);
+
+  // Redirect admin users away from user routes
+  useEffect(() => {
+    if (reduxAuthenticated && reduxUser?.role === 'Admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [reduxAuthenticated, reduxUser?.role, navigate]);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);

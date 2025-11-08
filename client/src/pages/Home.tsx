@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 import { matchService } from "../services/matchService";
 import { creditService } from "../services/creditService";
 import { useAuth } from "../store/useAuthStore";
@@ -8,6 +10,15 @@ import { CREDIT_COSTS } from "../utils/calculateCredits";
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  // Check if admin is logged in (from Redux store)
+  const { user: reduxUser, isAuthenticated: reduxAuthenticated } = useSelector((state: RootState) => state.auth);
+
+  // Redirect admin users away from user routes
+  useEffect(() => {
+    if (reduxAuthenticated && reduxUser?.role === 'Admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [reduxAuthenticated, reduxUser?.role, navigate]);
   const [credits, setCredits] = useState(user?.credits || 0);
   const [currentMatch, setCurrentMatch] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -271,24 +282,24 @@ export default function Home() {
       : currentMatch.revealStatus?.user2Requested;
 
     return (
-      <div className="bg-white/10 backdrop-blur-xl rounded-3xl overflow-hidden max-w-md w-full border border-white/20 shadow-2xl">
+      <div className="bg-white rounded-2xl overflow-hidden max-w-md w-full border border-gray-200 shadow-lg">
         {/* Badge */}
         <div
           className={`px-4 sm:px-6 py-3 flex justify-between items-center ${
             isRevealed
-              ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 border-b border-green-400/30"
-              : "bg-white/5 border-b border-white/10"
+              ? "bg-emerald-50 border-b border-emerald-200"
+              : "bg-gray-50 border-b border-gray-200"
           }`}
         >
           <span
             className={`text-sm font-medium flex items-center gap-2 ${
-              isRevealed ? "text-green-300" : "text-white/80"
+              isRevealed ? "text-emerald-700" : "text-gray-700"
             }`}
           >
             <span className="text-base">{isRevealed ? "✨" : "🎭"}</span>
             {isRevealed ? "Revealed Profile" : "Anonymous Profile"}
           </span>
-          <span className="text-sm text-white/60 flex items-center gap-1">
+          <span className="text-sm text-gray-600 flex items-center gap-1">
             <svg
               className="w-4 h-4"
               fill="none"
@@ -313,19 +324,19 @@ export default function Home() {
         </div>
 
         {/* Photo */}
-        <div className="relative h-96 sm:h-[28rem] overflow-hidden">
+        <div className="relative h-96 sm:h-[28rem] overflow-hidden bg-gray-100">
           <img
             src={photos[0]}
             alt="Match"
             className="w-full h-full object-cover transition-all duration-500"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/60 via-transparent to-transparent" />
           <div className="absolute bottom-6 left-6 right-6">
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-2 drop-shadow-lg">
               {displayName}, {currentMatch.age}
             </h2>
             {!isRevealed && (
-              <p className="text-white/80 text-sm flex items-center gap-2">
+              <p className="text-white/90 text-sm flex items-center gap-2">
                 <svg
                   className="w-4 h-4"
                   fill="currentColor"
@@ -344,27 +355,27 @@ export default function Home() {
         </div>
 
         {/* Info */}
-        <div className="p-6 space-y-5">
+        <div className="p-6 space-y-5 bg-white">
           {currentMatch.bio && (
-            <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-              <h3 className="text-sm font-semibold text-white/60 mb-2 uppercase tracking-wide">
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                 About
               </h3>
-              <p className="text-white/90 leading-relaxed">
+              <p className="text-gray-900 leading-relaxed">
                 {currentMatch.bio}
               </p>
             </div>
           )}
 
           <div>
-            <h3 className="text-sm font-semibold text-white/60 mb-3 uppercase tracking-wide">
+            <h3 className="text-sm font-semibold text-gray-600 mb-3 uppercase tracking-wide">
               Interests
             </h3>
             <div className="flex flex-wrap gap-2">
               {currentMatch.interests.map((interest: string) => (
                 <span
                   key={interest}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-white border border-purple-400/30 rounded-full text-sm font-medium backdrop-blur-sm"
+                  className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-sm font-medium"
                 >
                   {interest}
                 </span>
@@ -374,15 +385,15 @@ export default function Home() {
 
           {/* Reveal Status Banner */}
           {isRevealed ? (
-            <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-400/30 rounded-2xl p-4 text-center backdrop-blur-sm">
-              <p className="text-green-300 font-medium flex items-center justify-center gap-2">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center">
+              <p className="text-emerald-700 font-medium flex items-center justify-center gap-2">
                 <span className="text-xl">🎉</span>
                 Profile revealed! You can now see everything.
               </p>
             </div>
           ) : (
-            <div className="bg-white/5 border border-white/20 rounded-2xl p-4 text-center backdrop-blur-sm">
-              <p className="text-white/70 flex items-center justify-center gap-2 text-sm">
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 text-center">
+              <p className="text-gray-600 flex items-center justify-center gap-2 text-sm">
                 <svg
                   className="w-4 h-4"
                   fill="currentColor"
@@ -405,10 +416,10 @@ export default function Home() {
               <button
                 onClick={handleSkip}
                 className="w-full sm:w-auto px-2 sm:px-6 py-2.5 sm:py-3.5 
-                      bg-white/5 border-2 border-red-400/50 text-red-300 
+                      bg-white border-2 border-red-300 text-red-600 
                       rounded-lg sm:rounded-xl font-semibold 
-                      hover:bg-red-500/10 hover:border-red-400 
-                      transition-all backdrop-blur-sm 
+                      hover:bg-red-50 hover:border-red-400 
+                      transition-all 
                       flex items-center justify-center sm:gap-2 gap-1
                       text-sm sm:text-base"
               >
@@ -421,12 +432,12 @@ export default function Home() {
               disabled={alreadyRequested}
               className={`w-full sm:w-auto px-2 sm:px-6 py-2.5 sm:py-3.5 
                           rounded-lg sm:rounded-xl font-semibold transition-all 
-                          shadow-md sm:shadow-lg flex items-center justify-center sm:gap-2 gap-1
+                          shadow-sm flex items-center justify-center sm:gap-2 gap-1
                           text-sm sm:text-base 
                           ${
                             alreadyRequested
-                              ? 'bg-gradient-to-r from-gray-600 to-gray-700 text-gray-300 cursor-not-allowed opacity-60'
-                              : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:from-purple-600 hover:to-pink-600 hover:shadow-purple-500/40'
+                              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                              : 'bg-blue-600 text-white hover:bg-blue-700 shadow-md'
                           }`}
             >
               <span className="text-base sm:text-lg">{alreadyRequested ? '⏳' : '💜'}</span>
@@ -438,7 +449,7 @@ export default function Home() {
 
           <button
             onClick={() => navigate(`/chat/${currentMatch.matchId}`)}
-            className="w-full px-6 py-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-semibold hover:from-pink-600 hover:to-rose-600 transition-all shadow-lg hover:shadow-pink-500/50 flex items-center justify-center gap-2 text-lg"
+            className="w-full px-6 py-4 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-lg"
           >
             <span className="text-xl">💬</span>
             {isRevealed ? "Continue Chat" : "Start Chat"}
@@ -449,36 +460,27 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-      </div>
-
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Header */}
-      <div className="fixed w-full z-60 bg-black/20 backdrop-blur-xl border-b border-white/10  top-0">
+      <div className="fixed w-full z-60 bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-sm top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">💕</span>
+            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+              <span className="text-xl text-white font-bold">S</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
               S.T.A.R.T.
             </h1>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="bg-gradient-to-r from-amber-500/20 to-yellow-500/20 px-4 py-2 rounded-full flex items-center gap-2 font-semibold border border-amber-400/30 backdrop-blur-sm">
+            <div className="bg-blue-50 px-4 py-2 rounded-lg flex items-center gap-2 font-semibold border border-blue-200">
               <span className="text-lg">💎</span>
-              <span className="text-white">{credits}</span>
+              <span className="text-blue-700">{credits}</span>
             </div>
             <button
               onClick={() => navigate("/profile")}
-              className="w-10 h-10 bg-white/10 backdrop-blur-sm rounded-xl flex items-center justify-center text-white hover:bg-white/20 transition border border-white/20"
+              className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-700 hover:bg-gray-200 transition border border-gray-200"
             >
               <span className="text-xl">👤</span>
             </button>
@@ -488,22 +490,22 @@ export default function Home() {
 
       {/* Reveal Requests Banner */}
       {pendingRevealRequests.length > 0 && (
-        <div className="relative z-10 bg-gradient-to-r from-purple-600/90 to-pink-600/90 backdrop-blur-xl text-white py-4 px-4 border-b border-white/20">
+        <div className="relative z-10 bg-blue-50 border-b border-blue-200 py-4 px-4">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-2xl">✨</span>
                 </div>
                 <div>
-                  <p className="font-semibold text-lg">
+                  <p className="font-semibold text-lg text-gray-900">
                     {pendingRevealRequests.length}{" "}
                     {pendingRevealRequests.length === 1
                       ? "person wants"
                       : "people want"}{" "}
                     to reveal!
                   </p>
-                  <p className="text-sm text-white/80">
+                  <p className="text-sm text-gray-600">
                     Accept to see their full profile
                   </p>
                 </div>
@@ -518,13 +520,13 @@ export default function Home() {
                     <div key={match._id} className="flex gap-2 flex-wrap">
                       <button
                         onClick={() => handleAcceptReveal(match._id)}
-                        className="bg-white text-purple-600 px-4 sm:px-5 py-2.5 rounded-xl font-semibold hover:bg-white/90 transition-all shadow-lg text-sm whitespace-nowrap"
+                        className="bg-blue-600 text-white px-4 sm:px-5 py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-sm text-sm whitespace-nowrap"
                       >
                         ✓ Accept {displayName} (3 💎)
                       </button>
                       <button
                         onClick={() => handleRejectReveal(match._id)}
-                        className="bg-white/10 text-white px-4 py-2.5 rounded-xl font-semibold hover:bg-white/20 transition-all border border-white/30 backdrop-blur-sm text-sm"
+                        className="bg-white text-gray-700 px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-all border border-gray-200 text-sm"
                       >
                         ✕
                       </button>
@@ -541,19 +543,19 @@ export default function Home() {
       <div className="relative z-10 top-4 flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4 pt-20 pb-30">
         {!currentMatch ? (
           <div className="text-center max-w-lg">
-            <div className="w-24 h-24 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-purple-500/50">
+            <div className="w-24 h-24 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-sm border border-blue-200">
               <span className="text-5xl">💕</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Ready to find your match?
             </h2>
-            <p className="text-white/70 text-lg mb-8">
+            <p className="text-gray-600 text-lg mb-8">
               Click below to discover someone special
             </p>
             <button
               onClick={() => handleFindMatch()}
               disabled={loading || credits < CREDIT_COSTS.FIND_MATCH}
-              className="px-10 py-5 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl text-xl font-semibold hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-2xl hover:shadow-purple-500/50 disabled:transform-none flex items-center gap-3 mx-auto"
+              className="px-10 py-5 bg-blue-600 text-white rounded-xl text-xl font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-md hover:shadow-lg disabled:transform-none flex items-center gap-3 mx-auto"
             >
               {loading ? (
                 <>
@@ -567,31 +569,31 @@ export default function Home() {
                 </>
               )}
             </button>
-            <p className="text-sm text-white/50 mt-3 flex items-center justify-center gap-2">
+            <p className="text-sm text-gray-500 mt-3 flex items-center justify-center gap-2">
               <span className="text-base">💎</span>
               Uses 1 credit
             </p>
 
             {credits === 0 && (
-              <div className="mt-8 p-6 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-400/30 rounded-2xl backdrop-blur-sm">
-                <p className="text-amber-300 font-semibold text-lg mb-2">
+              <div className="mt-8 p-6 bg-amber-50 border border-amber-200 rounded-xl">
+                <p className="text-amber-700 font-semibold text-lg mb-2">
                   Out of credits!
                 </p>
-                <p className="text-amber-200/80 text-sm">
+                <p className="text-amber-600 text-sm">
                   Come back tomorrow for 5 fresh credits
                 </p>
               </div>
             )}
 
             {/* Tips */}
-            <div className="mt-8 p-6 bg-white/5 backdrop-blur-xl rounded-2xl text-left border border-white/10">
+            <div className="mt-8 p-6 bg-blue-50 rounded-xl text-left border border-blue-200">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
                   <span className="text-xl">💡</span>
                 </div>
                 <div>
-                  <p className="text-white font-medium mb-1">Pro Tip</p>
-                  <p className="text-white/70 text-sm">
+                  <p className="text-gray-900 font-medium mb-1">Pro Tip</p>
+                  <p className="text-gray-600 text-sm">
                     Respond within 24 hours for better matches and stronger
                     connections
                   </p>

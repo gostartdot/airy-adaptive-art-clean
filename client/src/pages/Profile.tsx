@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "../store";
 import { userService } from "../services/userService";
 import { creditService } from "../services/creditService";
 import { authService } from "../services/authService";
@@ -9,6 +11,15 @@ import { INTERESTS_OPTIONS } from "../utils/constants";
 export default function Profile() {
   const navigate = useNavigate();
   const { user, logout, updateUser } = useAuth();
+  // Check if admin is logged in (from Redux store)
+  const { user: reduxUser, isAuthenticated: reduxAuthenticated } = useSelector((state: RootState) => state.auth);
+
+  // Redirect admin users away from user routes
+  useEffect(() => {
+    if (reduxAuthenticated && reduxUser?.role === 'Admin') {
+      navigate('/admin', { replace: true });
+    }
+  }, [reduxAuthenticated, reduxUser?.role, navigate]);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [credits, setCredits] = useState(0);

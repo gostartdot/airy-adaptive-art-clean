@@ -2,33 +2,33 @@
 // Inspired by Vercel, Linear, Notion aesthetic
 
 export const theme = {
-  // Color Palette - Modern, accessible, professional
+  // Color Palette - Trustworthy, minimalist, professional
   colors: {
-    // Primary - Purple gradient for romance/connection
+    // Primary - Trustworthy blue
     primary: {
-      50: '#faf5ff',
-      100: '#f3e8ff',
-      200: '#e9d5ff',
-      300: '#d8b4fe',
-      400: '#c084fc',
-      500: '#a855f7', // Main brand color
-      600: '#9333ea',
-      700: '#7e22ce',
-      800: '#6b21a8',
-      900: '#581c87',
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
+      500: '#3b82f6', // Main brand color - trustworthy blue
+      600: '#2563eb',
+      700: '#1d4ed8',
+      800: '#1e40af',
+      900: '#1e3a8a',
     },
-    // Secondary - Pink for warmth/dating context
+    // Secondary - Classic navy for depth
     secondary: {
-      50: '#fdf2f8',
-      100: '#fce7f3',
-      200: '#fbcfe8',
-      300: '#f9a8d4',
-      400: '#f472b6',
-      500: '#ec4899',
-      600: '#db2777',
-      700: '#be185d',
-      800: '#9d174d',
-      900: '#831843',
+      50: '#f8fafc',
+      100: '#f1f5f9',
+      200: '#e2e8f0',
+      300: '#cbd5e1',
+      400: '#94a3b8',
+      500: '#64748b',
+      600: '#475569',
+      700: '#334155',
+      800: '#1e293b',
+      900: '#0f172a',
     },
     // Accent - Red for actions
     accent: {
@@ -147,14 +147,13 @@ export const theme = {
   },
 } as const;
 
-// Gradient presets
+// Gradient presets - Minimalist and trustworthy
 export const gradients = {
-  primary: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  romantic: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-  sunset: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-  ocean: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-  purple: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
-  glass: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
+  primary: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+  subtle: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+  light: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+  professional: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
+  glass: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%)',
 } as const;
 
 // Animation keyframes

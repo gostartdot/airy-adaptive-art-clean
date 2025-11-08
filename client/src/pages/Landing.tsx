@@ -4,6 +4,7 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { X } from "lucide-react";
 import { authService } from "../services/authService";
 import { useAuth } from "../store/useAuthStore";
+import { toast } from "sonner";
 
 function LandingContent() {
   const navigate = useNavigate();
@@ -14,6 +15,20 @@ function LandingContent() {
   const [hasNavigated, setHasNavigated] = useState(false);
 
   useEffect(() => {
+    // Check if admin user is logged in (from Redux store)
+    try {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        if (user?.role === 'Admin') {
+          navigate("/admin", { replace: true });
+          return;
+        }
+      }
+    } catch (error) {
+      // Ignore parsing errors
+    }
+
     // Only navigate once to prevent redirect loops
     if (isAuthenticated && !hasNavigated) {
       setHasNavigated(true);
@@ -66,8 +81,8 @@ function LandingContent() {
       logout();
       authService.removeToken();
       
-      const errorMessage = error.response?.data?.message || error.message || "Failed to sign in with Google. Please try again.";
-      alert(errorMessage);
+      const errorMessage = error.response?.data?.message|| error.response?.data?.error || error.message || "Failed to sign in with Google. Please try again.";
+      toast.error(errorMessage);
       setIsLoading(false);
       setShowModal(false);
     }
@@ -166,48 +181,48 @@ function LandingContent() {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="bg-white min-h-screen">
       {/* Floating Nav */}
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrollY > 30
-            ? "bg-black/20 backdrop-blur-xl border-b border-white/10"
-            : ""
+            ? "bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-sm"
+            : "bg-white"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">💕</span>
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                <span className="text-xl text-white font-bold">S</span>
               </div>
-              <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">
                 START
               </span>
             </div>
             <div className="hidden md:flex items-center gap-8">
               <button
                 onClick={() => scrollToSection("features")}
-                className="text-white/80 hover:text-white transition"
+                className="text-gray-600 hover:text-gray-900 transition font-medium"
               >
                 Features
               </button>
               <button
                 onClick={() => scrollToSection("how-it-works")}
-                className="text-white/80 hover:text-white transition"
+                className="text-gray-600 hover:text-gray-900 transition font-medium"
               >
                 How It Works
               </button>
               <button
                 onClick={() => setShowModal(true)}
-                className="px-6 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-white font-medium hover:shadow-lg hover:shadow-purple-500/50 transition"
+                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium shadow-sm hover:shadow-md transition"
               >
                 Get Started
               </button>
             </div>
             <button
                 onClick={() => setShowModal(true)}
-                className="sm:hidden px-6 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-white font-medium hover:shadow-lg hover:shadow-purple-500/50 transition"
+                className="sm:hidden px-6 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium shadow-sm hover:shadow-md transition"
               >
                 Get Started
               </button>
@@ -216,36 +231,21 @@ function LandingContent() {
       </nav>
 
       {/* Hero Section - Full Height */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl animate-pulse" />
-          <div
-            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/30 rounded-full blur-3xl animate-pulse"
-            style={{ animationDelay: "1s" }}
-          />
-          <div
-            className="absolute top-1/2 left-1/2 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse"
-            style={{ animationDelay: "2s" }}
-          />
-        </div>
-
+      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-b from-white to-gray-50">
         <div className="relative z-10 max-w-6xl mx-auto text-center pt-24 sm:pt-20">
           <div className="mb-6 sm:mb-8">
-            <span className="inline-block px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-purple-300 text-sm font-medium border border-white/20">
-              Secure, Trustworthy, And Real Ties
+            <span className="inline-block px-4 py-2 bg-blue-50 rounded-full text-blue-700 text-sm font-medium border border-blue-200">
+              Secure, Trustworthy, And Real Connections
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl md:text-8xl font-bold mb-4 sm:mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-              Find Real Love
-            </span>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold mb-4 sm:mb-6 leading-tight text-gray-900">
+            Find Real Love
             <br />
-            <span className="text-white">Beyond The Surface</span>
+            <span className="text-blue-600">Beyond The Surface</span>
           </h1>
 
-          <p className="text-lg sm:text-xl md:text-2xl text-white/70 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4">
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-600 mb-8 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-4">
             Connect through personality, not photos. START brings
             authenticity back to dating with anonymous profiles and meaningful
             conversations. Build real connections before appearances.
@@ -254,29 +254,29 @@ function LandingContent() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 sm:mb-16">
             <button
               onClick={() => setShowModal(true)}
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full text-white font-semibold text-lg hover:shadow-2xl hover:shadow-purple-500/50 transition transform hover:scale-105"
+              className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold text-lg shadow-md hover:shadow-lg transition transform hover:scale-105"
             >
               Start Your Journey
             </button>
             <button
               onClick={() => scrollToSection("how-it-works")}
-              className="w-full sm:w-auto px-8 py-4 bg-white/10 backdrop-blur-sm rounded-full text-white font-semibold text-lg border border-white/20 hover:bg-white/20 transition"
+              className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-gray-50 rounded-lg text-gray-700 font-semibold text-lg border-2 border-gray-200 hover:border-gray-300 transition"
             >
               Learn More
             </button>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-8 max-w-4xl mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 max-w-4xl mx-auto px-4">
             {stats.map((stat, index) => (
               <div
                 key={index}
-                className="bg-white/5 backdrop-blur-sm rounded-2xl px-2 py-3 sm:p-6 border border-white/10"
+                className="bg-white rounded-xl px-4 py-6 sm:p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="text-xl  sm:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+                <div className="text-2xl sm:text-4xl font-bold text-blue-600 mb-2">
                   {stat.value}
                 </div>
-                <div className="text-white/60 text-sm sm:text-base">
+                <div className="text-gray-600 text-sm sm:text-base">
                   {stat.label}
                 </div>
               </div>
@@ -285,8 +285,8 @@ function LandingContent() {
 
           {/* Scroll Indicator */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce hidden sm:block">
-            <div className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2">
-              <div className="w-1.5 h-3 bg-white/50 rounded-full" />
+            <div className="w-6 h-10 border-2 border-gray-300 rounded-full flex items-start justify-center p-2">
+              <div className="w-1.5 h-3 bg-gray-400 rounded-full" />
             </div>
           </div>
         </div>
@@ -295,37 +295,37 @@ function LandingContent() {
       {/* Features Section - Full Height */}
       <section
         id="features"
-        className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20"
+        className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20 bg-white"
       >
         <div className="max-w-7xl mx-auto w-full">
           <div className="text-center mb-12 sm:mb-20">
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-4 sm:mb-6">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-4 sm:mb-6">
               Why Choose{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-blue-600">
                 START
               </span>
             </h2>
-            <p className="text-lg sm:text-xl text-white/70 max-w-3xl mx-auto px-4">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               Experience dating the way it should be. Authentic, secure, and
               focused on real connections between real people.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {features.map((feature, index) => (
               <div
                 key={index}
-                className="group bg-white/5 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105"
+                className="group bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300"
               >
                 <div
-                  className={`w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center text-2xl sm:text-3xl mb-4 sm:mb-6 shadow-lg group-hover:shadow-2xl transition`}
+                  className="w-14 h-14 sm:w-16 sm:h-16 bg-blue-100 rounded-xl flex items-center justify-center text-2xl sm:text-3xl mb-4 sm:mb-6 shadow-sm group-hover:bg-blue-200 transition-colors"
                 >
                   {feature.icon}
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
                   {feature.title}
                 </h3>
-                <p className="text-white/70 leading-relaxed">
+                <p className="text-gray-600 leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -333,17 +333,17 @@ function LandingContent() {
           </div>
 
           {/* How It's Different */}
-          <div className="mt-16 sm:mt-24 bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-3xl p-6 sm:p-12 border border-white/10">
+          <div className="mt-16 sm:mt-24 bg-gray-50 rounded-2xl p-6 sm:p-12 border border-gray-200">
             <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
               <div>
-                <h3 className="text-2xl sm:text-4xl font-bold text-white mb-4 sm:mb-6">
+                <h3 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Different By Design
                 </h3>
                 <div className="space-y-4 sm:space-y-6">
                   <div className="flex items-start gap-4">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                       <svg
-                        className="w-4 h-4 sm:w-5 sm:h-5 text-green-400"
+                        className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -355,18 +355,18 @@ function LandingContent() {
                       </svg>
                     </div>
                     <div>
-                      <h4 className="text-white font-semibold mb-1 text-lg sm:text-xl">
+                      <h4 className="text-gray-900 font-semibold mb-1 text-lg sm:text-xl">
                         No Superficial Swiping
                       </h4>
-                      <p className="text-white/60 text-sm sm:text-base">
+                      <p className="text-gray-600 text-sm sm:text-base">
                         Focus on personality and compatibility first, not just physical appearance
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                       <svg
-                        className="w-4 h-4 sm:w-5 sm:h-5 text-green-400"
+                        className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -378,19 +378,19 @@ function LandingContent() {
                       </svg>
                     </div>
                     <div>
-                      <h4 className="text-white font-semibold mb-1 text-lg sm:text-xl">
+                      <h4 className="text-gray-900 font-semibold mb-1 text-lg sm:text-xl">
                         Quality Over Quantity
                       </h4>
-                      <p className="text-white/60 text-sm sm:text-base">
+                      <p className="text-gray-600 text-sm sm:text-base">
                         Credit system encourages thoughtful and intentional
                         connections with real people
                       </p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                       <svg
-                        className="w-4 h-4 sm:w-5 sm:h-5 text-green-400"
+                        className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-600"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -402,10 +402,10 @@ function LandingContent() {
                       </svg>
                     </div>
                     <div>
-                      <h4 className="text-white font-semibold mb-1 text-lg sm:text-xl">
+                      <h4 className="text-gray-900 font-semibold mb-1 text-lg sm:text-xl">
                         Safe and Secure
                       </h4>
-                      <p className="text-white/60 text-sm sm:text-base">
+                      <p className="text-gray-600 text-sm sm:text-base">
                         Your identity remains anonymous until both people are comfortable revealing it
                       </p>
                     </div>
@@ -413,12 +413,12 @@ function LandingContent() {
                 </div>
               </div>
               <div className="relative">
-                <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-3xl p-6 sm:p-8 backdrop-blur-sm border border-white/10">
+                <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 shadow-sm">
                   <div className="text-4xl sm:text-6xl mb-4">🎯</div>
-                  <h4 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                  <h4 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">
                     Quality Matches
                   </h4>
-                  <p className="text-white/70 text-sm sm:text-base">
+                  <p className="text-gray-600 text-sm sm:text-base">
                     Focus on meaningful connections with people who share your
                     values and interests
                   </p>
@@ -432,17 +432,17 @@ function LandingContent() {
       {/* How It Works Section - Full Height */}
       <section
         id="how-it-works"
-        className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20"
+        className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 py-16 sm:py-20 bg-gray-50"
       >
         <div className="max-w-7xl mx-auto w-full">
           <div className="text-center mb-12 sm:mb-20">
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-4 sm:mb-6">
+            <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-4 sm:mb-6">
               How It{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-blue-600">
                 Works
               </span>
             </h2>
-            <p className="text-lg sm:text-xl text-white/70 max-w-3xl mx-auto px-4">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-4">
               Four simple steps to finding meaningful connections
             </p>
           </div>
@@ -451,18 +451,18 @@ function LandingContent() {
             {steps.map((step, index) => (
               <div
                 key={index}
-                className="relative bg-white/5 backdrop-blur-xl rounded-3xl p-6 sm:p-10 border border-white/10 hover:border-white/20 transition group"
+                className="relative bg-white rounded-2xl p-6 sm:p-10 border border-gray-200 hover:border-blue-300 hover:shadow-lg transition group"
               >
-                <div className="absolute -top-4 -left-4 sm:-top-6 sm:-left-6 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-xl">
+                <div className="absolute -top-4 -left-4 sm:-top-6 sm:-left-6 w-12 h-12 sm:w-16 sm:h-16 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-lg sm:text-xl shadow-lg">
                   {step.number}
                 </div>
                 <div className="text-4xl sm:text-5xl mb-4 sm:mb-6">
                   {step.icon}
                 </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
                   {step.title}
                 </h3>
-                <p className="text-white/70 leading-relaxed text-sm sm:text-base">
+                <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
                   {step.description}
                 </p>
               </div>
@@ -472,24 +472,24 @@ function LandingContent() {
           {/* CTA Section */}
           <div
             id="signup"
-            className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-xl rounded-3xl p-8 sm:p-16 border border-white/10 text-center"
+            className="bg-white rounded-2xl p-8 sm:p-16 border border-gray-200 shadow-sm text-center"
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4 sm:mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6">
               Ready to Start Your Journey?
             </h2>
-            <p className="text-lg sm:text-xl text-white/70 mb-8 sm:mb-12 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 mb-8 sm:mb-12 max-w-2xl mx-auto">
               Join people who believe in finding real connections beyond the
               surface. Start meaningful conversations today.
             </p>
 
             {isLoading ? (
               <div className="flex flex-col items-center py-8">
-                <div className="w-12 h-12 border-4 border-purple-200/20 border-t-purple-500 rounded-full animate-spin" />
-                <p className="mt-4 text-white/70">Setting up your account...</p>
+                <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                <p className="mt-4 text-gray-600">Setting up your account...</p>
               </div>
             ) : (
               <div className="flex flex-col items-center">
-                <div className="bg-white/10 backdrop-blur-sm rounded-4xl p-4 sm:p-8 inline-block border border-white/10">
+                <div className="bg-white rounded-xl p-4 sm:p-8 inline-block border border-gray-200 shadow-sm">
                   <GoogleLogin
                     onSuccess={handleGoogleSuccess}
                     onError={handleGoogleError}
@@ -500,18 +500,18 @@ function LandingContent() {
                     width={window.innerWidth < 640 ? "280" : "320"}
                   />
                 </div>
-                <p className="text-xs sm:text-sm text-white/50 mt-6 sm:mt-8 max-w-md px-4">
+                <p className="text-xs sm:text-sm text-gray-500 mt-6 sm:mt-8 max-w-md px-4">
                   By continuing, you agree to our{" "}
                   <button
                     onClick={() => navigate("/terms")}
-                    className="text-purple-400 hover:text-purple-300 transition underline"
+                    className="text-blue-600 hover:text-blue-700 transition underline"
                   >
                     Terms of Service
                   </button>{" "}
                   and{" "}
                   <button
                     onClick={() => navigate("/privacy")}
-                    className="text-purple-400 hover:text-purple-300 transition underline"
+                    className="text-blue-600 hover:text-blue-700 transition underline"
                   >
                     Privacy Policy
                   </button>
@@ -571,26 +571,26 @@ function LandingContent() {
       {/* Auth Modal */}
       {showModal && (
         <div 
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/30 backdrop-blur-sm"
           style={{
             animation: "fadeIn 0.2s ease-out"
           }}
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 border border-slate-700 rounded-2xl p-8 w-full max-w-md max-h-[85vh] overflow-y-auto"
+            className="bg-white border border-gray-200 rounded-2xl p-8 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl"
             style={{
               animation: "scaleIn 0.3s ease-out"
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative mb-6">
-              <h2 className="text-2xl font-bold text-white text-center">
+              <h2 className="text-2xl font-bold text-gray-900 text-center">
                 Welcome to START
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-0 -right-2 text-slate-400 hover:text-white transition-colors p-1 hover:bg-slate-700 rounded-full"
+                className="absolute top-0 -right-2 text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
                 aria-label="Close modal"
               >
                 <X className="w-6 h-6" />
@@ -599,12 +599,12 @@ function LandingContent() {
 
             {isLoading ? (
               <div className="flex flex-col items-center py-8">
-                <div className="w-12 h-12 border-4 border-purple-200/20 border-t-purple-500 rounded-full animate-spin" />
-                <p className="mt-4 text-slate-300">Setting up your account...</p>
+                <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+                <p className="mt-4 text-gray-600">Setting up your account...</p>
               </div>
             ) : (
               <>
-                <button className="w-full p-0 mb-2 bg-white hover:bg-slate-100 text-slate-900 font-semibold rounded-lg py-3 transition-colors">
+                <button className="w-full p-0 mb-2 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg py-3 transition-colors border border-gray-200">
                   <div className="flex gap-3 justify-center items-center w-full">
                     <GoogleLogin
                       onSuccess={handleGoogleSuccess}
@@ -618,7 +618,7 @@ function LandingContent() {
                   </div>
                 </button>
 
-                <div className="mt-6 text-xs text-slate-400 text-center">
+                <div className="mt-6 text-xs text-gray-500 text-center">
                   <p>By continuing, you agree to our</p>
                   <div className="flex justify-center gap-4 mt-1">
                     <button 
@@ -626,7 +626,7 @@ function LandingContent() {
                         setShowModal(false);
                         navigate("/terms");
                       }}
-                      className="text-blue-400 hover:text-blue-300 underline underline-offset-2 hover:underline-offset-4 transition-all duration-200"
+                      className="text-blue-600 hover:text-blue-700 underline underline-offset-2 hover:underline-offset-4 transition-all duration-200"
                     >
                       Terms of Service
                     </button>
@@ -635,7 +635,7 @@ function LandingContent() {
                         setShowModal(false);
                         navigate("/privacy");
                       }}
-                      className="text-blue-400 hover:text-blue-300 underline underline-offset-2 hover:underline-offset-4 transition-all duration-200"
+                      className="text-blue-600 hover:text-blue-700 underline underline-offset-2 hover:underline-offset-4 transition-all duration-200"
                     >
                       Privacy Policy
                     </button>
@@ -648,34 +648,34 @@ function LandingContent() {
       )}
 
       {/* Footer */}
-      <footer className="relative border-t border-white/10 py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="relative border-t border-gray-200 bg-white py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">💕</span>
+              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                <span className="text-xl text-white font-bold">S</span>
               </div>
-              <span className="text-xl font-bold text-white">START</span>
+              <span className="text-xl font-bold text-gray-900">START</span>
             </div>
-            <div className="text-white/50 text-sm text-center md:text-left">
+            <div className="text-gray-500 text-sm text-center md:text-left">
               © 2025 START Dating App. All rights reserved.
             </div>
             <div className="flex gap-6">
               <button 
                 onClick={() => navigate("/privacy")} 
-                className="text-white/50 hover:text-white transition"
+                className="text-gray-500 hover:text-gray-900 transition font-medium"
               >
                 Privacy
               </button>
               <button 
                 onClick={() => navigate("/terms")} 
-                className="text-white/50 hover:text-white transition"
+                className="text-gray-500 hover:text-gray-900 transition font-medium"
               >
                 Terms
               </button>
               <a 
                 href="mailto:contact@startdating.app" 
-                className="text-white/50 hover:text-white transition"
+                className="text-gray-500 hover:text-gray-900 transition font-medium"
               >
                 Contact
               </a>

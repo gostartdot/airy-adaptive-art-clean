@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import { authService } from "../services/authService";
 import { useAuth } from "../store/useAuthStore";
 import { INTERESTS_OPTIONS, CITIES } from "../utils/constants";
@@ -21,6 +22,9 @@ interface OnboardingData {
     ageRange: { min: number; max: number };
     maxDistance: number;
   };
+  // Verification fields
+  isWorkingProfessional?: boolean;
+  salaryProofImages?: string[];
 }
 
 export default function Onboarding() {
@@ -47,6 +51,8 @@ export default function Onboarding() {
       ageRange: { min: 22, max: 30 },
       maxDistance: 20,
     },
+    isWorkingProfessional: undefined,
+    salaryProofImages: [],
   });
 
   // Redirect if no Google data is present
@@ -463,7 +469,7 @@ export default function Onboarding() {
         <h2 className="text-3xl font-bold text-white mb-2">
           Who would you like to meet?
         </h2>
-        <p className="text-white/60">Step 5 of 5</p>
+        <p className="text-white/60">Step 5 of 6</p>
       </div>
 
       <div>
@@ -586,6 +592,181 @@ export default function Onboarding() {
     </div>
   );
 
+  const renderStep6 = () => (
+    <div className="space-y-6 animate-slide-up">
+      <div>
+        <h2 className="text-3xl font-bold text-white mb-2">
+          Verification Required
+        </h2>
+        <p className="text-white/60">Step 6 of 6</p>
+      </div>
+
+      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-400/30 p-5 rounded-2xl backdrop-blur-sm">
+        <p className="text-white/90 mb-4">
+          To ensure a quality community, we verify that all members are working professionals with a salary above ₹40,000.
+        </p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-white/80 mb-4 uppercase tracking-wide">
+          Are you a working professional with salary above ₹40,000?
+        </label>
+        <div className="space-y-3">
+          <button
+            onClick={() => setFormData({ ...formData, isWorkingProfessional: true })}
+            className={`w-full p-4 rounded-xl text-left transition-all ${
+              formData.isWorkingProfessional === true
+                ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg border-2 border-green-400"
+                : "bg-white/10 text-white/70 border border-white/20 hover:bg-white/20"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                formData.isWorkingProfessional === true
+                  ? "border-white bg-white"
+                  : "border-white/50"
+              }`}>
+                {formData.isWorkingProfessional === true && (
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                )}
+              </div>
+              <span className="font-semibold">Yes, I am a working professional with salary above ₹40,000</span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setFormData({ ...formData, isWorkingProfessional: false })}
+            className={`w-full p-4 rounded-xl text-left transition-all ${
+              formData.isWorkingProfessional === false
+                ? "bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg border-2 border-red-400"
+                : "bg-white/10 text-white/70 border border-white/20 hover:bg-white/20"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                formData.isWorkingProfessional === false
+                  ? "border-white bg-white"
+                  : "border-white/50"
+              }`}>
+                {formData.isWorkingProfessional === false && (
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                )}
+              </div>
+              <span className="font-semibold">No</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {formData.isWorkingProfessional === true && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-white/80 mb-3 uppercase tracking-wide">
+              Upload Salary Proof (2-3 images required)
+            </label>
+            <p className="text-xs text-white/60 mb-3">
+              Please upload clear images of your salary slip, offer letter, or bank statement showing salary above ₹40,000
+            </p>
+            
+            <div className="grid grid-cols-3 gap-3">
+              {[0, 1, 2].map((index) => (
+                <div
+                  key={index}
+                  className="aspect-square border-2 border-dashed border-white/20 rounded-xl flex items-center justify-center relative overflow-hidden bg-white/5 backdrop-blur-sm hover:border-white/40 transition"
+                >
+                  {formData.salaryProofImages?.[index] ? (
+                    <>
+                      <img
+                        src={formData.salaryProofImages[index]}
+                        alt={`Salary proof ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={() => {
+                          const newImages = [...(formData.salaryProofImages || [])];
+                          newImages.splice(index, 1);
+                          setFormData({ ...formData, salaryProofImages: newImages });
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-lg transition text-xs"
+                      >
+                        ×
+                      </button>
+                    </>
+                  ) : (
+                    <label className="cursor-pointer flex flex-col items-center w-full h-full justify-center hover:bg-white/10 transition">
+                      <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center mb-1">
+                        <span className="text-lg text-white">+</span>
+                      </div>
+                      <span className="text-xs text-white/70 font-medium">
+                        Add Image
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleSalaryProofUpload(e, index)}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-white/50 mt-2">
+              {formData.salaryProofImages?.length || 0} of 2-3 images uploaded
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const handleSalaryProofUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Image is too large. Please select an image under 20MB");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const compressedBase64 = await compressImage(file);
+      
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/upload-onboarding-photo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ photo: compressedBase64 }),
+      });
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to upload image');
+      }
+
+      const newImages = [...(formData.salaryProofImages || [])];
+      newImages[index] = result.data.photoUrl;
+      setFormData({ ...formData, salaryProofImages: newImages });
+      
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast.error("Failed to upload image. Please try another photo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const canGoNext = () => {
     switch (step) {
       case 1:
@@ -602,6 +783,14 @@ export default function Onboarding() {
         return formData.interests.length >= 1;
       case 5:
         return formData.preferences.showMe.length > 0;
+      case 6:
+        if (formData.isWorkingProfessional === false) {
+          return true; // Can proceed if NO
+        }
+        if (formData.isWorkingProfessional === true) {
+          return formData.salaryProofImages && formData.salaryProofImages.length >= 2;
+        }
+        return false;
       default:
         return false;
     }
@@ -610,19 +799,40 @@ export default function Onboarding() {
   const handleComplete = async () => {
     try {
       setLoading(true);
-      const result = await authService.completeOnboarding(formData);
+      
+      // If user selected NO for working professional
+      if (formData.isWorkingProfessional === false) {
+        // Just redirect with toast - don't create account
+        toast.error("You are not eligible to use this platform", {
+          description: "This platform is only for working professionals with salary above 40k",
+          duration: 5000,
+        });
+        navigate("/", { replace: true });
+        setLoading(false);
+        return;
+      }
 
-      if (result.success) {
-        login(result.data.user, result.data.token);
-        authService.setToken(result.data.token);
-        navigate("/home", { replace: true });
-      } else {
-        throw new Error("Failed to complete onboarding");
+      // If user selected YES and uploaded proof
+      if (formData.isWorkingProfessional === true && formData.salaryProofImages && formData.salaryProofImages.length >= 2) {
+        const result = await authService.completeOnboarding(formData);
+
+        if (result.success) {
+          toast.info("Your account is under verification", {
+            description: "Your account is being checked by admin for verification. You will receive an email once verified.",
+            duration: 6000,
+          });
+          navigate("/", { replace: true });
+        } else {
+          throw new Error("Failed to complete onboarding");
+        }
       }
     } catch (error: any) {
       console.error("Onboarding error:", error);
       const errorMessage = error.response?.data?.error || error.message || "Failed to complete onboarding";
-      alert(errorMessage);
+      toast.error("Error", {
+        description: errorMessage,
+      });
+    } finally {
       setLoading(false);
     }
   };
@@ -654,6 +864,7 @@ export default function Onboarding() {
         {step === 3 && renderStep3()}
         {step === 4 && renderStep4()}
         {step === 5 && renderStep5()}
+        {step === 6 && renderStep6()}
 
         <div className="flex gap-3 sm:gap-4 mt-8">
           {step > 1 && (
@@ -664,7 +875,7 @@ export default function Onboarding() {
               Back
             </button>
           )}
-          {step < 5 ? (
+          {step < 6 ? (
             <button
               onClick={() => setStep(step + 1)}
               disabled={!canGoNext()}
@@ -695,7 +906,7 @@ export default function Onboarding() {
 
         {/* Progress Indicator */}
         <div className="flex justify-center gap-2 mt-8">
-          {[1, 2, 3, 4, 5].map((s) => (
+          {[1, 2, 3, 4, 5, 6].map((s) => (
             <div
               key={s}
               className={`h-2 rounded-full transition-all ${
