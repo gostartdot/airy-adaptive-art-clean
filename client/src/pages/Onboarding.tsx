@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { authService } from "../services/authService";
-import { useAuth } from "../store/useAuthStore";
+// import { useAuth } from "../store/useAuthStore";
 import { INTERESTS_OPTIONS, CITIES } from "../utils/constants";
 
 interface OnboardingData {
@@ -30,7 +30,7 @@ interface OnboardingData {
 export default function Onboarding() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  // const { login } = useAuth();
 
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
