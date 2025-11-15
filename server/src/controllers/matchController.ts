@@ -58,8 +58,13 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
 
     // STEP 1: Try to find REAL users first
     // Filter out AI persona IDs from matched/skipped users (only use real user ObjectIds)
-    const realMatchedUsers = user.matchedUsers.filter((id: any) => !isAIPersonaId(id.toString()));
-    const realSkippedUsers = user.skippedUsers.filter((id: any) => !isAIPersonaId(id.toString()));
+    const realMatchedUsers = (user.matchedUsers || []).filter((id: any) => !isAIPersonaId(id.toString()));
+    const realSkippedUsers = (user.skippedUsers || []).filter((id: any) => !isAIPersonaId(id.toString()));
+    
+    // Check if user has preferences set
+    if (!user.preferences) {
+      return sendError(res, 'User preferences not set. Please complete your profile.', 400);
+    }
     
     const potentialMatches = await User.find({
       _id: { 
@@ -88,7 +93,7 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
       console.log('⚠️  No real users available. Using AI persona as fallback...');
       
       // Get already matched AI personas to avoid duplicates
-      const matchedPersonaIds = user.matchedUsers.filter((id: any) => 
+      const matchedPersonaIds = (user.matchedUsers || []).filter((id: any) => 
         isAIPersonaId(id.toString())
       ).map((id: any) => id.toString());
 
@@ -166,6 +171,9 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
     }
 
     // Update user's matched users (avoid duplicates)
+    if (!user.matchedUsers) {
+      user.matchedUsers = [];
+    }
     if (!user.matchedUsers.includes(randomMatch._id)) {
       user.matchedUsers.push(randomMatch._id);
       await user.save();

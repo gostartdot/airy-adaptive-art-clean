@@ -18,7 +18,8 @@ const allowedOrigins = [
   'http://localhost:5173',
   'https://gostart.live',
   'https://www.gostart.live',
-  'https://gostart-staging.vercel.app'
+  'https://gostart-staging.vercel.app',
+  'https://gostart-staging.vercel.apps'
 ].filter(Boolean);
 
 app.use(cors({
