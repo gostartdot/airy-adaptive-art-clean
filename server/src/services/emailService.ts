@@ -12,15 +12,10 @@ const createTransporter = () => {
 
   return nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 465,           // Must be 465
-    secure: true,        // Must be true for port 465
     auth: {
       user: emailUser,
       pass: emailPass,   // Gmail APP PASSWORD (16 chars)
-    },
-    tls: {
-      rejectUnauthorized: false,  // Prevent ECONNRESET on cloud hosts
-    },
+    }
   });
 };
 
