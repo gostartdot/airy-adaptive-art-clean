@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import type { CredentialResponse } from "@react-oauth/google";
 import {
   X,
   Shield,
@@ -54,12 +55,18 @@ function LandingContent() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleGoogleSuccess = async (credentialResponse) => {
+  const handleGoogleSuccess = async (
+    credentialResponse: CredentialResponse
+  ) => {
     try {
       setIsLoading(true);
 
       logout();
       authService.removeToken();
+
+      if (!credentialResponse.credential) {
+        throw new Error("Credential not found");
+      }
 
       const result = await authService.googleAuth(
         credentialResponse.credential
@@ -86,7 +93,7 @@ function LandingContent() {
       } else {
         throw new Error("Invalid response from server");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Google auth error:", error);
       logout();
       authService.removeToken();
@@ -107,7 +114,7 @@ function LandingContent() {
     alert("Failed to sign in with Google. Please try again.");
   };
 
-  const scrollToSection = (id) => {
+  const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     element?.scrollIntoView({ behavior: "smooth" });
   };

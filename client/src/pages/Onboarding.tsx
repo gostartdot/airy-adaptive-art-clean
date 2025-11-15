@@ -7,11 +7,9 @@ import {
   Heart,
   MapPin,
   Camera,
-  User,
   CheckCircle2,
   XCircle,
   Loader2,
-  AlertCircle,
   Shield,
 } from "lucide-react";
 
@@ -925,3 +923,6 @@ export default function Onboarding() {
     </div>
   );
 }
+
+
+
