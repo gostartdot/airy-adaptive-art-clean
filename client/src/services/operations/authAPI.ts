@@ -1,4 +1,4 @@
-import type { AppDispatch } from '../../store/types';
+import type { AppDispatch } from '../../store';
 import { setCredentials, setLoading, clearSignupData } from '../../store/authSlice';
 import api from '../api';
 

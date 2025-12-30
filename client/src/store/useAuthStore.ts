@@ -1,24 +1,4 @@
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  photos: string[];
-  credits: number;
-  bio?: string;
-  interests?: string[];
-  city?: string;
-  companyName?: string;
-  position?: string;
-  workingSince?: string;
-  salaryProofImages?: string[];
-  matchedUsers?: any[];
-  createdAt?: Date;
-  preferences?: {
-    showMe: string[];
-    ageRange: { min: number; max: number };
-    maxDistance: number;
-  };
-}
+import type { User } from '../types/user';
 
 interface AuthState {
   user: User | null;

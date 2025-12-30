@@ -22,6 +22,7 @@ import {
 import type { RootState } from '../store';
 import { logout } from '../store/authSlice';
 import { userService } from '../services/userService';
+import type { User } from '../types/user';
 
 // Helper function to optimize Cloudinary image URLs for faster loading
 const optimizeImageUrl = (url: string, width: number = 800, height: number = 600): string => {
@@ -84,18 +85,6 @@ const OptimizedImage: React.FC<{
     </div>
   );
 };
-
-interface User {
-  _id: string;
-  name?: string;
-  email: string;
-  verificationStatus?: 'pending' | 'approved' | 'rejected';
-  salaryProofImages?: string[];
-  isActive?: boolean;
-  createdAt?: string;
-  rejectionReason?: string;
-  verifiedAt?: string;
-}
 
 const Admin: React.FC = () => {
   const navigate = useNavigate();
