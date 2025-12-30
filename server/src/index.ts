@@ -19,6 +19,7 @@ const allowedOrigins = [
   'https://gostart.live',
   'https://www.gostart.live',
   'https://gostart-staging.vercel.app',
+  'https://start-dating-app-1.vercel.app',
   // CRITICAL: Add your DigitalOcean backend URL for self-connection
   'https://clownfish-app-da38q.ondigitalocean.app',
   // Also allow without protocol for various client configurations
