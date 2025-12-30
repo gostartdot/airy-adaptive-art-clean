@@ -35,6 +35,9 @@ export interface IUser extends Document {
   matchedUsers?: Array<mongoose.Types.ObjectId | string>; // Can be ObjectId or AI persona string ID
   // Verification fields
   isWorkingProfessional?: boolean;
+  companyName?: string;
+  position?: string;
+  workingSince?: string;
   salaryProofImages?: string[];
   verificationStatus?: 'pending' | 'approved' | 'rejected';
   verifiedBy?: mongoose.Types.ObjectId;
@@ -81,6 +84,9 @@ const UserSchema = new Schema<IUser>(
     matchedUsers: [{ type: Schema.Types.Mixed }], // Mixed to support both ObjectId and AI persona string IDs
     // Verification fields
     isWorkingProfessional: { type: Boolean },
+    companyName: { type: String },
+    position: { type: String },
+    workingSince: { type: String },
     salaryProofImages: [{ type: String }],
     verificationStatus: { 
       type: String, 

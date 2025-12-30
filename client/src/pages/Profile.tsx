@@ -47,6 +47,10 @@ export default function Profile() {
     interests: user?.interests || [],
     city: user?.city || "",
     photos: user?.photos || [],
+    companyName: user?.companyName || "",
+    position: user?.position || "",
+    workingSince: user?.workingSince || "",
+    salaryProofImages: user?.salaryProofImages || [],
     preferences: {
       showMe: user?.preferences?.showMe || [],
       ageRange: user?.preferences?.ageRange || { min: 22, max: 30 },
@@ -70,6 +74,10 @@ export default function Profile() {
           interests: result.data.interests || [],
           city: result.data.city,
           photos: result.data.photos || [],
+          companyName: result.data.companyName || "",
+          position: result.data.position || "",
+          workingSince: result.data.workingSince || "",
+          salaryProofImages: result.data.salaryProofImages || [],
           preferences: {
             showMe: result.data.preferences?.showMe || [],
             ageRange: result.data.preferences?.ageRange || { min: 22, max: 30 },
@@ -652,7 +660,7 @@ export default function Profile() {
 
         {/* Bio */}
         {user?.bio && (
-          <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm max-h-[250px] sm:max-h-[300px] md:max-h-[400px] overflow-y-auto">
+          <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm overflow-y-auto">
             <h3 className="font-semibold text-gray-900 text-lg mb-3 flex items-center gap-2">
               <Edit2 className="w-5 h-5 text-rose-600" />
               Bio
@@ -660,6 +668,33 @@ export default function Profile() {
             <p className="text-gray-700 leading-relaxed break-words whitespace-pre-wrap">
               {user.bio}
             </p>
+            {/* Professional Info */}
+            {(user?.companyName || user?.position || user?.workingSince) && (
+              <div className="space-y-4 pt-6 border-t border-gray-200">
+                {user?.companyName && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Company:</p>
+                    <p className="text-gray-700 font-medium">
+                      {user.companyName}
+                    </p>
+                  </div>
+                )}
+                {user?.position && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Position:</p>
+                    <p className="text-gray-700 font-medium">{user.position}</p>
+                  </div>
+                )}
+                {user?.workingSince && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-2">Working Since:</p>
+                    <p className="text-gray-700 font-medium">
+                      {user.workingSince}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 

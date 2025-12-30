@@ -101,7 +101,8 @@ const Admin: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user, isAuthenticated, isLoading } = useSelector((state: RootState) => state.auth);
-  
+  const [showUserDetailsModal, setShowUserDetailsModal] = useState(false);
+
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -278,6 +279,8 @@ const Admin: React.FC = () => {
     return null;
   }
 
+  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Header */}
@@ -289,8 +292,12 @@ const Admin: React.FC = () => {
                 <Users className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-sm text-gray-500">User Management & Verification</p>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  Admin Dashboard
+                </h1>
+                <p className="text-sm text-gray-500">
+                  User Management & Verification
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -319,7 +326,9 @@ const Admin: React.FC = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Total Users</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Total Users
+                </p>
                 <p className="text-3xl font-bold text-gray-900">{totalCount}</p>
               </div>
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -327,36 +336,48 @@ const Admin: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-2xl shadow-sm border border-amber-200 p-6 hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Pending Review</p>
-                <p className="text-3xl font-bold text-amber-600">{pendingCount}</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Pending Review
+                </p>
+                <p className="text-3xl font-bold text-amber-600">
+                  {pendingCount}
+                </p>
               </div>
               <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
                 <Clock className="w-6 h-6 text-amber-600" />
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-2xl shadow-sm border border-emerald-200 p-6 hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Approved</p>
-                <p className="text-3xl font-bold text-emerald-600">{approvedCount}</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Approved
+                </p>
+                <p className="text-3xl font-bold text-emerald-600">
+                  {approvedCount}
+                </p>
               </div>
               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
                 <CheckCircle2 className="w-6 h-6 text-emerald-600" />
               </div>
             </div>
           </div>
-          
+
           <div className="bg-white rounded-2xl shadow-sm border border-red-200 p-6 hover:shadow-md transition-shadow duration-300">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">Rejected</p>
-                <p className="text-3xl font-bold text-red-600">{rejectedCount}</p>
+                <p className="text-sm font-medium text-gray-600 mb-1">
+                  Rejected
+                </p>
+                <p className="text-3xl font-bold text-red-600">
+                  {rejectedCount}
+                </p>
               </div>
               <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
                 <XCircle className="w-6 h-6 text-red-600" />
@@ -379,16 +400,16 @@ const Admin: React.FC = () => {
                 className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
-            
+
             {/* Filter Buttons */}
             <div className="flex gap-2 flex-wrap">
               <button
                 type="button"
-                onClick={() => setFilter('all')}
+                onClick={() => setFilter("all")}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer active:scale-95 ${
-                  filter === 'all'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  filter === "all"
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 <Filter className="w-4 h-4" />
@@ -396,11 +417,11 @@ const Admin: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setFilter('pending')}
+                onClick={() => setFilter("pending")}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer active:scale-95 ${
-                  filter === 'pending'
-                    ? 'bg-amber-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  filter === "pending"
+                    ? "bg-amber-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 <Clock className="w-4 h-4" />
@@ -408,11 +429,11 @@ const Admin: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setFilter('approved')}
+                onClick={() => setFilter("approved")}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer active:scale-95 ${
-                  filter === 'approved'
-                    ? 'bg-emerald-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  filter === "approved"
+                    ? "bg-emerald-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 <CheckCircle2 className="w-4 h-4" />
@@ -420,11 +441,11 @@ const Admin: React.FC = () => {
               </button>
               <button
                 type="button"
-                onClick={() => setFilter('rejected')}
+                onClick={() => setFilter("rejected")}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all cursor-pointer active:scale-95 ${
-                  filter === 'rejected'
-                    ? 'bg-red-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  filter === "rejected"
+                    ? "bg-red-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 <XCircle className="w-4 h-4" />
@@ -445,7 +466,9 @@ const Admin: React.FC = () => {
             <div className="p-12 text-center">
               <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500 font-medium">No users found</p>
-              <p className="text-sm text-gray-400 mt-1">Try adjusting your filters or search query</p>
+              <p className="text-sm text-gray-400 mt-1">
+                Try adjusting your filters or search query
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -474,19 +497,30 @@ const Admin: React.FC = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
                   {filteredUsers.map((userItem) => (
-                    <tr key={userItem._id} className="hover:bg-blue-50/50 transition-colors">
+                    <tr
+                      key={userItem._id}
+                      className="hover:bg-blue-50/50 transition-colors"
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-lg flex items-center justify-center text-white font-semibold shadow-sm">
-                            {userItem.name?.[0]?.toUpperCase() || userItem.email[0].toUpperCase()}
+                            {userItem.name?.[0]?.toUpperCase() ||
+                              userItem.email[0].toUpperCase()}
                           </div>
                           <div>
-                            <div className="text-sm font-semibold text-gray-900">
-                              {userItem.name || 'N/A'}
+                            <div
+                              className="text-sm font-semibold text-gray-900 hover:text-blue-600 cursor-pointer transition-colors"
+                              onClick={() => {
+                                setSelectedUser(userItem);
+                                setShowUserDetailsModal(true);
+                              }}
+                            >
+                              {userItem.name || "N/A"}
                             </div>
                           </div>
                         </div>
                       </td>
+
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2 text-sm text-gray-600">
                           <Mail className="w-4 h-4 text-gray-400" />
@@ -496,26 +530,30 @@ const Admin: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           {getStatusBadge(userItem.verificationStatus)}
-                          {!userItem.isActive && userItem.verificationStatus === 'approved' && (
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-700 border border-orange-200">
-                              <Ban className="w-3.5 h-3.5" />
-                              Suspended
-                            </span>
-                          )}
+                          {!userItem.isActive &&
+                            userItem.verificationStatus === "approved" && (
+                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-700 border border-orange-200">
+                                <Ban className="w-3.5 h-3.5" />
+                                Suspended
+                              </span>
+                            )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                         {userItem.createdAt
-                          ? new Date(userItem.createdAt).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric'
-                            })
-                          : 'N/A'}
+                          ? new Date(userItem.createdAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )
+                          : "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          {userItem.verificationStatus === 'pending' && (
+                          {userItem.verificationStatus === "pending" && (
                             <>
                               <button
                                 type="button"
@@ -554,7 +592,7 @@ const Admin: React.FC = () => {
                               </button>
                             </>
                           )}
-                          {userItem.verificationStatus === 'approved' && (
+                          {userItem.verificationStatus === "approved" && (
                             <>
                               {userItem.isActive ? (
                                 <button
@@ -602,10 +640,13 @@ const Admin: React.FC = () => {
               <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center">
                 <XCircle className="w-6 h-6 text-red-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">Reject User Verification</h3>
+              <h3 className="text-xl font-bold text-gray-900">
+                Reject User Verification
+              </h3>
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              Rejecting verification for: <strong className="text-gray-900">{selectedUser.email}</strong>
+              Rejecting verification for:{" "}
+              <strong className="text-gray-900">{selectedUser.email}</strong>
             </p>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Reason (optional)
@@ -622,7 +663,7 @@ const Admin: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setShowRejectModal(false);
-                  setRejectReason('');
+                  setRejectReason("");
                   setSelectedUser(null);
                 }}
                 className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors cursor-pointer active:scale-95"
@@ -642,77 +683,501 @@ const Admin: React.FC = () => {
       )}
 
       {/* Salary Proof Images Modal */}
-      {showProofModal && selectedUser && selectedUser.salaryProofImages && selectedUser.salaryProofImages.length > 0 && (
+      {showProofModal &&
+        selectedUser &&
+        selectedUser.salaryProofImages &&
+        selectedUser.salaryProofImages.length > 0 && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto border border-gray-200">
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <FileText className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">
+                      Salary Proof Images
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {selectedUser.email}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowProofModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                {selectedUser.salaryProofImages.map((image, index) => {
+                  const thumbnailUrl = optimizeImageUrl(image, 400, 500);
+                  const fullSizeUrl = image;
+
+                  return (
+                    <OptimizedImage
+                      key={index}
+                      thumbnailUrl={thumbnailUrl}
+                      fullSizeUrl={fullSizeUrl}
+                      alt={`Salary proof ${index + 1}`}
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProofModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors cursor-pointer active:scale-95"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProofModal(false);
+                    handleApprove(selectedUser._id);
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <Check className="w-5 h-5" />
+                  Approve User
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowProofModal(false);
+                    setShowRejectModal(true);
+                  }}
+                  className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <X className="w-5 h-5" />
+                  Reject User
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      {/* User Details Modal */}
+      {showUserDetailsModal && selectedUser && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-5xl w-full max-h-[90vh] overflow-y-auto border border-gray-200">
-            <div className="flex justify-between items-center mb-6">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-gray-200">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-blue-600" />
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                  {selectedUser.name?.[0]?.toUpperCase() ||
+                    selectedUser.email[0].toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">Salary Proof Images</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {selectedUser.name || "User Profile"}
+                  </h3>
                   <p className="text-sm text-gray-500">{selectedUser.email}</p>
                 </div>
               </div>
               <button
                 onClick={() => {
-                  setShowProofModal(false);
+                  setShowUserDetailsModal(false);
                   setSelectedUser(null);
                 }}
-                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {selectedUser.salaryProofImages.map((image, index) => {
-                const thumbnailUrl = optimizeImageUrl(image, 400, 500);
-                const fullSizeUrl = image;
-                
-                return (
-                  <OptimizedImage
-                    key={index}
-                    thumbnailUrl={thumbnailUrl}
-                    fullSizeUrl={fullSizeUrl}
-                    alt={`Salary proof ${index + 1}`}
-                  />
-                );
-              })}
+
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div>
+                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  Basic Information
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Full Name
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.name || "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Email
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.email}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Date of Birth
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.dateOfBirth
+                        ? new Date(selectedUser.dateOfBirth).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Age
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.age || "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Gender
+                    </p>
+                    <p className="text-sm font-medium text-gray-900 capitalize">
+                      {selectedUser.gender === "other" &&
+                      selectedUser.genderCustom
+                        ? selectedUser.genderCustom
+                        : selectedUser.gender || "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      City
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.city || "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Role
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.role || "User"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Account Status
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {selectedUser.isActive ? (
+                        <span className="text-sm font-medium text-emerald-600">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="text-sm font-medium text-red-600">
+                          Suspended
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Professional Information */}
+              <div>
+                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  Professional Information
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Working Professional
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.isWorkingProfessional ? "Yes" : "No"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Company Name
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.companyName || "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Position
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.position || "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Working Since
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.workingSince
+                        ? new Date(
+                            selectedUser.workingSince + "-01"
+                          ).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                          })
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 md:col-span-2">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Verification Status
+                    </p>
+                    <div className="flex items-center gap-2 mt-2">
+                      {getStatusBadge(selectedUser.verificationStatus)}
+                    </div>
+                  </div>
+                  {selectedUser.rejectionReason && (
+                    <div className="bg-red-50 p-4 rounded-xl border border-red-200 md:col-span-2">
+                      <p className="text-xs font-semibold text-red-700 uppercase mb-1">
+                        Rejection Reason
+                      </p>
+                      <p className="text-sm text-red-900">
+                        {selectedUser.rejectionReason}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Profile Details */}
+              <div>
+                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-blue-600" />
+                  Profile Details
+                </h4>
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                      Bio
+                    </p>
+                    <p className="text-sm text-gray-900">
+                      {selectedUser.bio || "No bio provided"}
+                    </p>
+                  </div>
+                  {selectedUser.interests &&
+                    selectedUser.interests.length > 0 && (
+                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <p className="text-xs font-semibold text-gray-500 uppercase mb-2">
+                          Interests
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedUser.interests.map((interest, index) => (
+                            <span
+                              key={index}
+                              className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium border border-blue-200"
+                            >
+                              {interest}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  {selectedUser.preferences && (
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                      <p className="text-xs font-semibold text-gray-500 uppercase mb-3">
+                        Preferences
+                      </p>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">
+                            Show Me:
+                          </span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {selectedUser.preferences.showMe?.join(", ") ||
+                              "N/A"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">
+                            Age Range:
+                          </span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {selectedUser.preferences.ageRange?.min || 18} -{" "}
+                            {selectedUser.preferences.ageRange?.max || 50}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">
+                            Max Distance:
+                          </span>
+                          <span className="text-sm font-medium text-gray-900">
+                            {selectedUser.preferences.maxDistance || 20} km
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Profile Photos */}
+              {selectedUser.photos && selectedUser.photos.length > 0 && (
+                <div>
+                  <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Eye className="w-5 h-5 text-blue-600" />
+                    Profile Photos
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {selectedUser.photos.map((photo, index) => (
+                      <OptimizedImage
+                        key={index}
+                        thumbnailUrl={optimizeImageUrl(photo, 300, 300)}
+                        fullSizeUrl={photo}
+                        alt={`Profile photo ${index + 1}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Salary Proof Images */}
+              {selectedUser.salaryProofImages &&
+                selectedUser.salaryProofImages.length > 0 && (
+                  <div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-blue-600" />
+                      Salary Proof Documents
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {selectedUser.salaryProofImages.map((image, index) => (
+                        <OptimizedImage
+                          key={index}
+                          thumbnailUrl={optimizeImageUrl(image, 400, 500)}
+                          fullSizeUrl={image}
+                          alt={`Salary proof ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Account Statistics */}
+              <div>
+                <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  Account Statistics
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Credits
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.credits || 0}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Last Active
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.lastActive
+                        ? new Date(selectedUser.lastActive).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Account Created
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.createdAt
+                        ? new Date(selectedUser.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                      Verified At
+                    </p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {selectedUser.verifiedAt
+                        ? new Date(selectedUser.verifiedAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "long",
+                              day: "numeric",
+                            }
+                          )
+                        : "Not verified"}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="flex gap-3 pt-4 border-t border-gray-200">
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
               <button
                 type="button"
                 onClick={() => {
-                  setShowProofModal(false);
+                  setShowUserDetailsModal(false);
                   setSelectedUser(null);
                 }}
                 className="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors cursor-pointer active:scale-95"
               >
                 Close
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowProofModal(false);
-                  handleApprove(selectedUser._id);
-                }}
-                className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-              >
-                <Check className="w-5 h-5" />
-                Approve User
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowProofModal(false);
-                  setShowRejectModal(true);
-                }}
-                className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
-              >
-                <X className="w-5 h-5" />
-                Reject User
-              </button>
+              {selectedUser.verificationStatus === "pending" && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUserDetailsModal(false);
+                      handleApprove(selectedUser._id);
+                    }}
+                    className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <Check className="w-5 h-5" />
+                    Approve
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowUserDetailsModal(false);
+                      setShowRejectModal(true);
+                    }}
+                    className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                  >
+                    <X className="w-5 h-5" />
+                    Reject
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

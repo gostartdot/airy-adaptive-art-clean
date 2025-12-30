@@ -7,6 +7,10 @@ interface User {
   bio?: string;
   interests?: string[];
   city?: string;
+  companyName?: string;
+  position?: string;
+  workingSince?: string;
+  salaryProofImages?: string[];
   matchedUsers?: any[];
   createdAt?: Date;
   preferences?: {

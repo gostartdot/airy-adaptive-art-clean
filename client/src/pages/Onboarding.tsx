@@ -31,6 +31,9 @@ interface OnboardingData {
     maxDistance: number;
   };
   isWorkingProfessional?: boolean;
+  companyName?: string;
+  position?: string;
+  workingSince?: string;
   salaryProofImages?: string[];
 }
 
@@ -59,6 +62,9 @@ export default function Onboarding() {
     },
     isWorkingProfessional: undefined,
     salaryProofImages: [],
+    companyName: "",
+    position: "",
+    workingSince: "",
   });
 
   useEffect(() => {
@@ -586,15 +592,15 @@ export default function Onboarding() {
         <div className="flex items-start gap-3">
           <Shield className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
           <p className="text-gray-700">
-            To ensure a quality community, we verify that all members are
-            working professionals with a salary above ₹40,000.
+            To ensure a quality community, we verify that all members are working
+            professionals with a salary above ₹50,000.
           </p>
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
-          Are you a working professional with salary above ₹40,000?
+          Are you a working professional with salary above ₹50,000?
         </label>
         <div className="space-y-3">
           <button
@@ -620,7 +626,7 @@ export default function Onboarding() {
                 )}
               </div>
               <span className="font-semibold">
-                Yes, I am a working professional with salary above ₹40,000
+                Yes, I am a working professional with salary above ₹50,000
               </span>
             </div>
           </button>
@@ -655,13 +661,62 @@ export default function Onboarding() {
 
       {formData.isWorkingProfessional === true && (
         <div className="space-y-4">
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+              Company Name
+            </label>
+            <input
+              type="text"
+              required={true}
+              value={formData.companyName || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, companyName: e.target.value })
+              }
+              placeholder="Company you work for"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+              Position/Designation
+            </label>
+            <input
+              type="text"
+              required={true}
+              value={formData.position || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, position: e.target.value })
+              }
+              placeholder="e.g., Software Engineer, Marketing Manager"
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition"
+            />
+          </div>
+
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+              Working Since
+            </label>
+            <input
+              type="month"
+              required={true}
+              value={formData.workingSince || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, workingSince: e.target.value })
+              }
+              className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition"
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
               Upload Salary Proof (2-3 images required)
             </label>
             <p className="text-xs text-gray-600 mb-3">
               Please upload clear images of your salary slip, offer letter, or
-              bank statement showing salary above ₹40,000
+              bank statement showing salary above ₹50,000
             </p>
 
             <div className="grid grid-cols-3 gap-3">

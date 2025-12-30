@@ -6,7 +6,7 @@ import { sendSuccess, sendError, sendServerError } from '../utils/responseHelper
 import { AuthRequest } from '../middlewares/authMiddleware';
 import cloudinary from '../config/cloudinary';
 import bcrypt from 'bcryptjs';
-import { sendOTPEmail, sendWelcomeEmail } from '../services/emailService';
+import { sendOTPEmail, sendUnderVerificationEmail } from '../services/emailService';
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -160,12 +160,24 @@ export const completeOnboarding = async (req: Request, res: Response) => {
       interests,
       preferences,
       isWorkingProfessional,
+      companyName,
+      position,
+      workingSince,
       salaryProofImages
     } = req.body;
 
     // Validate that user is a working professional
     if (isWorkingProfessional !== true) {
-      return sendError(res, 'Only working professionals with salary above 40k are eligible');
+      return sendError(res, 'Only working professionals with salary above 50k are eligible');
+    }
+    if (!companyName) {
+      return sendError(res, 'Please enter a company name');
+    }
+    if (!position) {
+      return sendError(res, 'Please enter a position');
+    }
+    if (!workingSince) {
+      return sendError(res, 'Please enter a working since date');
     }
 
     // Validate salary proof images
@@ -198,6 +210,9 @@ export const completeOnboarding = async (req: Request, res: Response) => {
       interests,
       preferences,
       isWorkingProfessional: true,
+      companyName,
+      position,
+      workingSince,
       salaryProofImages,
       verificationStatus: 'pending',
       credits: 0, // No credits until verified
@@ -205,6 +220,7 @@ export const completeOnboarding = async (req: Request, res: Response) => {
       isActive: false, // Inactive until verified
       lastActive: new Date()
     });
+    await sendUnderVerificationEmail(user.email, user.name as string);
 
     // Don't generate token - user needs to wait for admin verification
     return sendSuccess(res, {
@@ -397,7 +413,7 @@ export const signup = async (req: Request, res: Response) => {
     const token = generateToken(String(user._id));
 
     // Send welcome email
-    await sendWelcomeEmail(user.email, user.firstName || 'User');
+    // await sendWelcomeEmail(user.email, user.firstName || 'User');
 
     return sendSuccess(res, {
       token,
