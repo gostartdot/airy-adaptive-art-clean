@@ -14,12 +14,13 @@ const app: Application = express();
 // Allow multiple origins for development and production
 const allowedOrigins = [
   process.env.CLIENT_URL,
-  'http://localhost:5174',
-  'http://localhost:5173',
-  'https://gostart.live',
-  'https://www.gostart.live',
-  'https://gostart-staging.vercel.app',
-  'https://gostart-staging.vercel.apps'
+  "http://localhost:5174",
+  "http://localhost:5173",
+  "https://gostart.live",
+  "https://www.gostart.live",
+  "https://gostart-staging.vercel.app",
+  "https://gostart-staging.vercel.apps",
+  "https://start-dating-app-1.vercel.app/",
 ].filter(Boolean);
 
 app.use(cors({
