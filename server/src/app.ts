@@ -20,7 +20,7 @@ const allowedOrigins = [
   "https://www.gostart.live",
   "https://gostart-staging.vercel.app",
   "https://gostart-staging.vercel.apps",
-  "https://start-dating-app-1.vercel.app/",
+  "https://start-dating-app-1.vercel.app",
 ].filter(Boolean);
 
 app.use(cors({
