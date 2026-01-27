@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { authService } from "../services/authService";
-import { INTERESTS_OPTIONS, CITIES } from "../utils/constants";
+import { INTERESTS_OPTIONS } from "../utils/constants";
 import {
   Heart,
   MapPin,
