@@ -237,21 +237,37 @@ export default function Profile() {
 
   if (editing) {
     return (
-      <div className="min-h-screen bg-white relative overflow-hidden">
+      <div className="min-h-screen bg-[#0A0A0F] text-white relative overflow-hidden">
+        {/* Floating Particles Background */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-[#C5B4E3] rounded-full opacity-20"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animation: `float ${10 + Math.random() * 20}s linear infinite`,
+                animationDelay: `${Math.random() * 10}s`,
+              }}
+            />
+          ))}
+        </div>
+
         {/* Header */}
-        <div className="fixed w-full z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-sm top-0">
+        <div className="fixed w-full z-50 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/10 shadow-sm top-0">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
             <button
               onClick={() => setEditing(false)}
-              className="px-4 py-2 bg-gray-100 rounded-xl text-gray-700 hover:bg-gray-200 transition border border-gray-200 font-medium"
+              className="px-4 py-2 bg-white/5 rounded-xl text-white hover:bg-white/10 transition border border-white/10 font-medium"
             >
               Cancel
             </button>
-            <h1 className="text-xl font-bold text-gray-900">Edit Profile</h1>
+            <h1 className="text-xl font-bold text-white">Edit Profile</h1>
             <button
               onClick={handleSave}
               disabled={loading}
-              className="px-4 py-2 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl font-semibold hover:from-rose-700 hover:to-pink-700 disabled:opacity-50 transition shadow-lg"
+              className="px-4 py-2 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] disabled:opacity-50 transition shadow-lg"
             >
               {loading ? "Saving..." : "Save"}
             </button>
@@ -261,18 +277,18 @@ export default function Profile() {
         {/* Edit Form */}
         <div className="relative z-10 max-w-4xl mx-auto p-4 sm:p-6 space-y-6 pb-24 pt-24">
           {/* Photos */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-sm">
+            <label className="block text-sm font-semibold text-white/70 mb-3 uppercase tracking-wide">
               Photos ({formData.photos.length} of 4)
             </label>
-            <p className="text-xs text-gray-500 mb-4">
+            <p className="text-xs text-white/50 mb-4">
               Upload 2-4 photos (minimum 2 required)
             </p>
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {[0, 1, 2, 3].map((index) => (
                 <div
                   key={index}
-                  className="aspect-[3/4] border-2 border-dashed border-gray-300 rounded-2xl flex items-center justify-center relative overflow-hidden bg-gray-50 hover:border-rose-400 transition"
+                  className="aspect-[3/4] border-2 border-dashed border-white/10 rounded-2xl flex items-center justify-center relative overflow-hidden bg-white/5 hover:border-[#C5B4E3]/50 transition"
                 >
                   {formData.photos[index] ? (
                     <>
@@ -289,21 +305,21 @@ export default function Profile() {
                         <X className="w-4 h-4" />
                       </button>
                       {index === 0 && (
-                        <div className="absolute top-2 left-2 bg-gradient-to-r from-rose-600 to-pink-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
+                        <div className="absolute top-2 left-2 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] text-xs px-3 py-1 rounded-full font-semibold shadow-lg">
                           MAIN
                         </div>
                       )}
                     </>
                   ) : (
-                    <label className="cursor-pointer flex flex-col items-center w-full h-full justify-center hover:bg-gray-100 transition">
-                      <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mb-2">
+                    <label className="cursor-pointer flex flex-col items-center w-full h-full justify-center hover:bg-white/10 transition">
+                      <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center mb-2">
                         {uploadingPhoto ? (
-                          <Loader2 className="w-6 h-6 text-gray-600 animate-spin" />
+                          <Loader2 className="w-6 h-6 text-[#C5B4E3] animate-spin" />
                         ) : (
-                          <Camera className="w-6 h-6 text-gray-600" />
+                          <Camera className="w-6 h-6 text-[#C5B4E3]" />
                         )}
                       </div>
-                      <span className="text-xs text-gray-600 font-medium">
+                      <span className="text-xs text-white/60 font-medium">
                         {uploadingPhoto ? "Uploading..." : "Add Photo"}
                       </span>
                       <input
@@ -321,8 +337,8 @@ export default function Profile() {
           </div>
 
           {/* Name */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-sm">
+            <label className="block text-sm font-semibold text-white/70 mb-3 uppercase tracking-wide">
               Name
             </label>
             <input
@@ -331,14 +347,14 @@ export default function Profile() {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="w-full px-4 py-3.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 placeholder-gray-400 outline-none"
+              className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-[#C5B4E3] focus:border-transparent text-white placeholder-white/40 outline-none"
               placeholder="Enter your name"
             />
           </div>
 
           {/* Bio */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-sm">
+            <label className="block text-sm font-semibold text-white/70 mb-3 uppercase tracking-wide">
               Bio
             </label>
             <textarea
@@ -348,20 +364,20 @@ export default function Profile() {
               }
               rows={4}
               maxLength={150}
-              className="w-full px-4 py-3.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 placeholder-gray-400 outline-none resize-none"
+              className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-[#C5B4E3] focus:border-transparent text-white placeholder-white/40 outline-none resize-none"
               placeholder="Tell us about yourself..."
             />
             <div className="flex justify-between items-center mt-2">
-              <p className="text-xs text-gray-500">Max 150 characters</p>
-              <p className="text-xs text-gray-700 font-medium">
+              <p className="text-xs text-white/50">Max 150 characters</p>
+              <p className="text-xs text-white/70 font-medium">
                 {formData.bio.length}/150
               </p>
             </div>
           </div>
 
           {/* Interests */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-sm">
+            <label className="block text-sm font-semibold text-white/70 mb-3 uppercase tracking-wide">
               Interests ({formData.interests.length} of 5)
             </label>
             <div className="flex flex-wrap gap-2">
@@ -378,8 +394,8 @@ export default function Profile() {
                   }}
                   className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${
                     formData.interests.includes(interest)
-                      ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-lg"
-                      : "bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200"
+                      ? "bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] shadow-lg"
+                      : "bg-white/5 text-white/70 border border-white/10 hover:bg-white/10"
                   }`}
                 >
                   {interest}
@@ -389,8 +405,8 @@ export default function Profile() {
           </div>
 
           {/* City */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-sm">
+            <label className="block text-sm font-semibold text-white/70 mb-3 uppercase tracking-wide">
               City
             </label>
             <input
@@ -399,28 +415,28 @@ export default function Profile() {
               onChange={(e) =>
                 setFormData({ ...formData, city: e.target.value })
               }
-              className="w-full px-4 py-3.5 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 placeholder-gray-400 outline-none"
+              className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-[#C5B4E3] focus:border-transparent text-white placeholder-white/40 outline-none"
               placeholder="Your city"
             />
           </div>
 
           {/* Preferences Section */}
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Heart className="w-5 h-5 text-rose-600" />
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <Heart className="w-5 h-5 text-[#C5B4E3]" />
               Dating Preferences
             </h3>
 
             {/* Show Me */}
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+              <label className="block text-sm font-semibold text-white/70 mb-3 uppercase tracking-wide">
                 I'm interested in meeting:
               </label>
               <div className="space-y-2">
                 {["woman", "man", "non-binary"].map((pref) => (
                   <label
                     key={pref}
-                    className="flex items-center bg-gray-50 p-3 rounded-xl border border-gray-200 cursor-pointer hover:bg-gray-100 transition"
+                    className="flex items-center bg-white/5 p-3 rounded-xl border border-white/10 cursor-pointer hover:bg-white/10 transition"
                   >
                     <input
                       type="checkbox"
@@ -439,9 +455,9 @@ export default function Profile() {
                           },
                         });
                       }}
-                      className="mr-3 w-4 h-4 text-rose-600"
+                      className="mr-3 w-4 h-4 accent-[#C5B4E3]"
                     />
-                    <span className="capitalize text-gray-900">{pref}</span>
+                    <span className="capitalize text-white">{pref}</span>
                   </label>
                 ))}
               </div>
@@ -449,13 +465,13 @@ export default function Profile() {
 
             {/* Age Range */}
             <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-900 mb-4">
+              <label className="block text-sm font-semibold text-white mb-4">
                 Age range: {formData.preferences.ageRange.min} -{" "}
                 {formData.preferences.ageRange.max} years
               </label>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-600 text-sm w-12">Min</span>
+                  <span className="text-white/60 text-sm w-12">Min</span>
                   <input
                     type="range"
                     min="18"
@@ -473,14 +489,14 @@ export default function Profile() {
                         },
                       })
                     }
-                    className="flex-1 accent-rose-600"
+                    className="flex-1 accent-[#C5B4E3]"
                   />
-                  <span className="text-gray-900 font-medium w-8 text-center">
+                  <span className="text-white font-medium w-8 text-center">
                     {formData.preferences.ageRange.min}
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-600 text-sm w-12">Max</span>
+                  <span className="text-white/60 text-sm w-12">Max</span>
                   <input
                     type="range"
                     min="18"
@@ -498,9 +514,9 @@ export default function Profile() {
                         },
                       })
                     }
-                    className="flex-1 accent-rose-600"
+                    className="flex-1 accent-[#C5B4E3]"
                   />
-                  <span className="text-gray-900 font-medium w-8 text-center">
+                  <span className="text-white font-medium w-8 text-center">
                     {formData.preferences.ageRange.max}
                   </span>
                 </div>
@@ -509,8 +525,8 @@ export default function Profile() {
 
             {/* Maximum Distance */}
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-rose-600" />
+              <label className="block text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#C5B4E3]" />
                 Maximum distance: {formData.preferences.maxDistance} km
               </label>
               <div className="flex items-center gap-3">
@@ -528,34 +544,67 @@ export default function Profile() {
                       },
                     })
                   }
-                  className="flex-1 accent-rose-600"
+                  className="flex-1 accent-[#C5B4E3]"
                 />
-                <span className="text-gray-900 font-medium w-12 text-center">
+                <span className="text-white font-medium w-12 text-center">
                   {formData.preferences.maxDistance}
                 </span>
               </div>
             </div>
           </div>
         </div>
+
+        <style>{`
+          @keyframes float {
+            0%, 100% {
+              transform: translate(0, 0);
+            }
+            25% {
+              transform: translate(10px, -10px);
+            }
+            50% {
+              transform: translate(-5px, 5px);
+            }
+            75% {
+              transform: translate(-10px, -5px);
+            }
+          }
+        `}</style>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden sm:pt-20 pb-24">
+    <div className="min-h-screen bg-[#0A0A0F] text-white relative overflow-hidden sm:pt-20 pb-24">
+      {/* Floating Particles Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {[...Array(30)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-[#C5B4E3] rounded-full opacity-20"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${10 + Math.random() * 20}s linear infinite`,
+              animationDelay: `${Math.random() * 10}s`,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Header */}
-      <div className="fixed w-full z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-sm top-0">
+      <div className="fixed w-full z-50 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/10 shadow-sm top-0">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <button
             onClick={() => navigate("/home")}
-            className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-700 hover:bg-gray-200 transition border border-gray-200"
+            className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-white hover:bg-white/10 transition border border-white/10"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-xl font-bold text-gray-900">Profile</h1>
+          <h1 className="text-xl font-bold text-white">Profile</h1>
           <button
             onClick={() => setEditing(true)}
-            className="px-4 py-2 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl font-semibold hover:from-rose-700 hover:to-pink-700 transition shadow-lg text-sm flex items-center gap-1.5"
+            className="px-4 py-2 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] transition shadow-lg text-sm flex items-center gap-1.5"
           >
             <Edit2 className="w-4 h-4" />
             Edit
@@ -565,11 +614,11 @@ export default function Profile() {
 
       <div className="relative z-10 max-w-4xl mx-auto p-4 sm:p-6 space-y-6 pt-24">
         {/* Profile Header */}
-        <div className="bg-white border border-gray-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm">
           <div className="flex flex-col sm:flex-row items-center gap-6 mb-6">
             <div className="relative group">
               {user?.photos?.[0] ? (
-                <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border-2 border-rose-200">
+                <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-lg border-2 border-[#C5B4E3]/30">
                   <img
                     src={user.photos[0]}
                     alt={user.name}
@@ -577,7 +626,7 @@ export default function Profile() {
                   />
                 </div>
               ) : (
-                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#C5B4E3] to-[#B5A3D3] flex items-center justify-center text-[#0A0A0F] text-4xl font-bold shadow-lg">
                   {user?.name?.[0]?.toUpperCase()}
                 </div>
               )}
@@ -589,10 +638,10 @@ export default function Profile() {
               </button>
             </div>
             <div className="text-center sm:text-left flex-1">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl font-bold text-white mb-2">
                 {user?.name}
               </h2>
-              <p className="text-gray-600 flex items-center gap-2 justify-center sm:justify-start">
+              <p className="text-white/60 flex items-center gap-2 justify-center sm:justify-start">
                 <Mail className="w-4 h-4" />
                 {user?.email}
               </p>
@@ -600,38 +649,38 @@ export default function Profile() {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
+          <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/10">
             <div className="text-center">
-              <div className="text-3xl font-bold text-rose-600">
+              <div className="text-3xl font-bold text-[#C5B4E3]">
                 {user?.matchedUsers?.length || 0}
               </div>
-              <div className="text-sm text-gray-500 mt-1">Matches</div>
+              <div className="text-sm text-white/50 mt-1">Matches</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-amber-600 flex items-center justify-center gap-1">
+              <div className="text-3xl font-bold text-amber-400 flex items-center justify-center gap-1">
                 <Sparkles className="w-6 h-6" />
                 {credits}
               </div>
-              <div className="text-sm text-gray-500 mt-1">Credits</div>
+              <div className="text-sm text-white/50 mt-1">Credits</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-green-600">85%</div>
-              <div className="text-sm text-gray-500 mt-1">Complete</div>
+              <div className="text-3xl font-bold text-green-400">85%</div>
+              <div className="text-sm text-white/50 mt-1">Complete</div>
             </div>
           </div>
         </div>
 
         {/* Photos */}
         {user?.photos && user.photos.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900 text-lg flex items-center gap-2">
-                <Camera className="w-5 h-5 text-rose-600" />
+              <h3 className="font-semibold text-white text-lg flex items-center gap-2">
+                <Camera className="w-5 h-5 text-[#C5B4E3]" />
                 Photos
               </h3>
               <button
                 onClick={() => setEditing(true)}
-                className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-sm font-medium transition border border-rose-200"
+                className="px-3 py-1.5 bg-[#C5B4E3]/10 hover:bg-[#C5B4E3]/20 text-[#C5B4E3] rounded-lg text-sm font-medium transition border border-[#C5B4E3]/30"
               >
                 Edit Photos
               </button>
@@ -640,7 +689,7 @@ export default function Profile() {
               {user.photos.map((photo, index) => (
                 <div
                   key={index}
-                  className="aspect-square rounded-2xl overflow-hidden border border-gray-200 relative"
+                  className="aspect-square rounded-2xl overflow-hidden border border-white/10 relative"
                 >
                   <img
                     src={photo}
@@ -648,7 +697,7 @@ export default function Profile() {
                     className="w-full h-full object-cover"
                   />
                   {index === 0 && (
-                    <div className="absolute top-2 left-2 bg-gradient-to-r from-rose-600 to-pink-600 text-white text-xs px-2 py-1 rounded-full font-semibold shadow-lg">
+                    <div className="absolute top-2 left-2 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] text-xs px-2 py-1 rounded-full font-semibold shadow-lg">
                       MAIN
                     </div>
                   )}
@@ -660,35 +709,35 @@ export default function Profile() {
 
         {/* Bio */}
         {user?.bio && (
-          <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm overflow-y-auto">
-            <h3 className="font-semibold text-gray-900 text-lg mb-3 flex items-center gap-2">
-              <Edit2 className="w-5 h-5 text-rose-600" />
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-sm overflow-y-auto">
+            <h3 className="font-semibold text-white text-lg mb-3 flex items-center gap-2">
+              <Edit2 className="w-5 h-5 text-[#C5B4E3]" />
               Bio
             </h3>
-            <p className="text-gray-700 leading-relaxed break-words whitespace-pre-wrap">
+            <p className="text-white/70 leading-relaxed break-words whitespace-pre-wrap">
               {user.bio}
             </p>
             {/* Professional Info */}
             {(user?.companyName || user?.position || user?.workingSince) && (
-              <div className="space-y-4 pt-6 border-t border-gray-200">
+              <div className="space-y-4 pt-6 border-t border-white/10 mt-6">
                 {user?.companyName && (
                   <div>
-                    <p className="text-sm text-gray-500 mb-2">Company:</p>
-                    <p className="text-gray-700 font-medium">
+                    <p className="text-sm text-white/50 mb-2">Company:</p>
+                    <p className="text-white/70 font-medium">
                       {user.companyName}
                     </p>
                   </div>
                 )}
                 {user?.position && (
                   <div>
-                    <p className="text-sm text-gray-500 mb-2">Position:</p>
-                    <p className="text-gray-700 font-medium">{user.position}</p>
+                    <p className="text-sm text-white/50 mb-2">Position:</p>
+                    <p className="text-white/70 font-medium">{user.position}</p>
                   </div>
                 )}
                 {user?.workingSince && (
                   <div>
-                    <p className="text-sm text-gray-500 mb-2">Working Since:</p>
-                    <p className="text-gray-700 font-medium">
+                    <p className="text-sm text-white/50 mb-2">Working Since:</p>
+                    <p className="text-white/70 font-medium">
                       {user.workingSince}
                     </p>
                   </div>
@@ -700,16 +749,16 @@ export default function Profile() {
 
         {/* Interests */}
         {user?.interests && user.interests.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-            <h3 className="font-semibold text-gray-900 text-lg mb-4 flex items-center gap-2">
-              <Heart className="w-5 h-5 text-rose-600" />
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-sm">
+            <h3 className="font-semibold text-white text-lg mb-4 flex items-center gap-2">
+              <Heart className="w-5 h-5 text-[#C5B4E3]" />
               Interests
             </h3>
             <div className="flex flex-wrap gap-2">
               {user.interests.map((interest: string) => (
                 <span
                   key={interest}
-                  className="px-4 py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-sm font-medium"
+                  className="px-4 py-2.5 bg-[#C5B4E3]/20 text-[#C5B4E3] border border-[#C5B4E3]/30 rounded-xl text-sm font-medium"
                 >
                   {interest}
                 </span>
@@ -719,28 +768,28 @@ export default function Profile() {
         )}
 
         {/* Location */}
-        <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-          <h3 className="font-semibold text-gray-900 text-lg mb-3 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-rose-600" />
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-sm">
+          <h3 className="font-semibold text-white text-lg mb-3 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-[#C5B4E3]" />
             Location
           </h3>
-          <p className="text-gray-700 flex items-center gap-2">
-            <MapPin className="w-5 h-5 text-gray-400" />
+          <p className="text-white/70 flex items-center gap-2">
+            <MapPin className="w-5 h-5 text-white/40" />
             {user?.city}
           </p>
         </div>
 
         {/* Dating Preferences */}
         {user?.preferences && (
-          <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-900 text-lg flex items-center gap-2">
-                <Heart className="w-5 h-5 text-rose-600" />
+              <h3 className="font-semibold text-white text-lg flex items-center gap-2">
+                <Heart className="w-5 h-5 text-[#C5B4E3]" />
                 Dating Preferences
               </h3>
               <button
                 onClick={() => setEditing(true)}
-                className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg text-sm font-medium transition border border-rose-200"
+                className="px-3 py-1.5 bg-[#C5B4E3]/10 hover:bg-[#C5B4E3]/20 text-[#C5B4E3] rounded-lg text-sm font-medium transition border border-[#C5B4E3]/30"
               >
                 Edit
               </button>
@@ -748,12 +797,12 @@ export default function Profile() {
             <div className="space-y-4">
               {/* Show Me */}
               <div>
-                <p className="text-sm text-gray-500 mb-2">Interested in:</p>
+                <p className="text-sm text-white/50 mb-2">Interested in:</p>
                 <div className="flex flex-wrap gap-2">
                   {user.preferences.showMe?.map((gender: string) => (
                     <span
                       key={gender}
-                      className="px-3 py-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-sm font-medium capitalize"
+                      className="px-3 py-1.5 bg-[#C5B4E3]/20 text-[#C5B4E3] border border-[#C5B4E3]/30 rounded-lg text-sm font-medium capitalize"
                     >
                       {gender}
                     </span>
@@ -763,8 +812,8 @@ export default function Profile() {
 
               {/* Age Range */}
               <div>
-                <p className="text-sm text-gray-500 mb-2">Age range:</p>
-                <p className="text-gray-700 font-medium">
+                <p className="text-sm text-white/50 mb-2">Age range:</p>
+                <p className="text-white/70 font-medium">
                   {user.preferences.ageRange?.min} -{" "}
                   {user.preferences.ageRange?.max} years old
                 </p>
@@ -772,9 +821,9 @@ export default function Profile() {
 
               {/* Max Distance */}
               <div>
-                <p className="text-sm text-gray-500 mb-2">Maximum distance:</p>
-                <p className="text-gray-700 font-medium flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-rose-600" />
+                <p className="text-sm text-white/50 mb-2">Maximum distance:</p>
+                <p className="text-white/70 font-medium flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-[#C5B4E3]" />
                   {user.preferences.maxDistance} km
                 </p>
               </div>
@@ -783,18 +832,18 @@ export default function Profile() {
         )}
 
         {/* Account Info */}
-        <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-          <h3 className="font-semibold text-gray-900 text-lg mb-4 flex items-center gap-2">
-            <User className="w-5 h-5 text-rose-600" />
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-sm">
+          <h3 className="font-semibold text-white text-lg mb-4 flex items-center gap-2">
+            <User className="w-5 h-5 text-[#C5B4E3]" />
             Account
           </h3>
           <div className="space-y-3 text-sm">
-            <div className="flex items-center gap-3 text-gray-600">
-              <Mail className="w-5 h-5 text-rose-600" />
+            <div className="flex items-center gap-3 text-white/60">
+              <Mail className="w-5 h-5 text-[#C5B4E3]" />
               <span>Email: {user?.email}</span>
             </div>
-            <div className="flex items-center gap-3 text-gray-600">
-              <Calendar className="w-5 h-5 text-rose-600" />
+            <div className="flex items-center gap-3 text-white/60">
+              <Calendar className="w-5 h-5 text-[#C5B4E3]" />
               <span>
                 Member since:{" "}
                 {new Date(user?.createdAt || "").toLocaleDateString()}
@@ -807,14 +856,14 @@ export default function Profile() {
         <div className="space-y-3">
           <button
             onClick={() => navigate("/home")}
-            className="w-full px-6 py-4 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl font-semibold hover:from-rose-700 hover:to-pink-700 transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg"
+            className="w-full px-6 py-4 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg"
           >
             <ChevronLeft className="w-5 h-5" />
             Back to Home
           </button>
           <button
             onClick={handleLogout}
-            className="w-full px-6 py-4 bg-white border-2 border-red-300 text-red-600 rounded-xl font-semibold hover:bg-red-50 hover:border-red-400 transition flex items-center justify-center gap-2 text-lg"
+            className="w-full px-6 py-4 bg-white/5 border-2 border-red-400/30 text-red-400 rounded-xl font-semibold hover:bg-red-400/10 hover:border-red-400/50 transition flex items-center justify-center gap-2 text-lg"
           >
             <LogOut className="w-5 h-5" />
             Sign Out
@@ -823,34 +872,51 @@ export default function Profile() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 px-4 py-3 z-50 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0A0A0F]/95 backdrop-blur-xl border-t border-white/10 px-4 py-3 z-50 shadow-lg">
         <div className="max-w-md mx-auto flex justify-around">
           <button
             onClick={() => navigate("/home")}
-            className="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-all"
+            className="flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-all"
           >
-            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-all">
+            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
               <HomeIcon className="w-5 h-5" />
             </div>
             <span className="text-xs font-medium">Home</span>
           </button>
           <button
             onClick={() => navigate("/chats")}
-            className="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-all"
+            className="flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-all"
           >
-            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-all">
+            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
               <MessageCircle className="w-5 h-5" />
             </div>
             <span className="text-xs font-medium">Chats</span>
           </button>
-          <button className="flex flex-col items-center gap-1.5 text-rose-600 transition-all">
-            <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center border-2 border-rose-300">
+          <button className="flex flex-col items-center gap-1.5 text-[#C5B4E3] transition-all">
+            <div className="w-12 h-12 bg-[#C5B4E3]/20 rounded-xl flex items-center justify-center border-2 border-[#C5B4E3]/30">
               <User className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold">Profile</span>
           </button>
         </div>
       </div>
+
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0);
+          }
+          25% {
+            transform: translate(10px, -10px);
+          }
+          50% {
+            transform: translate(-5px, 5px);
+          }
+          75% {
+            transform: translate(-10px, -5px);
+          }
+        }
+      `}</style>
     </div>
   );
 }

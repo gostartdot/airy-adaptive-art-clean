@@ -15,8 +15,14 @@ export interface IUser extends Document {
   genderCustom?: string;
   showGender?: boolean;
   city?: string;
+  cityOther?: string;
   photos?: string[];
+  heightFeet?: string;
+  heightInches?: string;
+  religion?: string;
   bio?: string;
+  simplePleasures?: string;
+  goCrazyFor?: string;
   interests?: string[];
   preferences?: {
     showMe: string[];
@@ -64,8 +70,14 @@ const UserSchema = new Schema<IUser>(
     genderCustom: { type: String },
     showGender: { type: Boolean, default: true },
     city: { type: String },
+    cityOther: { type: String },
     photos: [{ type: String }],
+    heightFeet: { type: String },
+    heightInches: { type: String },
+    religion: { type: String },
     bio: { type: String, maxlength: 150 },
+    simplePleasures: { type: String },
+    goCrazyFor: { type: String },
     interests: [{ type: String }],
     preferences: {
       showMe: [{ type: String }],

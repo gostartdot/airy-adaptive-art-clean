@@ -215,7 +215,7 @@ export default function Chat() {
   const getDisplayName = () => {
     if (!matchData || !matchData.otherUser) return "Anonymous";
 
-    if (matchData.isRevealed) {
+    if (!matchData.isAnonymous) {
       return matchData.otherUser.name || "Anonymous";
     }
 
@@ -266,7 +266,7 @@ export default function Chat() {
   const handleRequestReveal = async () => {
     if (!matchId || !matchData) return;
 
-    if (matchData.isRevealed) {
+    if (!matchData.isAnonymous) {
       alert("Profile is already revealed!");
       return;
     }
@@ -352,13 +352,29 @@ export default function Chat() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white relative overflow-hidden">
+    <div className="flex flex-col h-screen bg-[#0A0A0F] text-white relative overflow-hidden">
+      {/* Floating Particles Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {[...Array(30)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-[#C5B4E3] rounded-full opacity-20"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${10 + Math.random() * 20}s linear infinite`,
+              animationDelay: `${Math.random() * 10}s`,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Header */}
-      <div className="relative z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-4 shadow-sm">
+      <div className="relative z-10 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/10 px-4 sm:px-6 py-4 shadow-sm">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate("/chats")}
-            className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-700 hover:bg-gray-200 transition border border-gray-200"
+            className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition border border-white/10"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -366,18 +382,18 @@ export default function Chat() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleProfileClick}
-                className="font-semibold text-gray-900 text-lg hover:text-rose-600 transition-colors cursor-pointer"
+                className="font-semibold text-white text-lg hover:text-[#C5B4E3] transition-colors cursor-pointer"
               >
                 {matchData ? getDisplayName() : "Loading..."}
               </button>
-              {matchData && !matchData.isRevealed && (
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full border border-gray-200 flex items-center gap-1">
+              {matchData && matchData.isAnonymous && (
+                <span className="text-xs bg-white/5 text-white/60 px-2 py-1 rounded-full border border-white/10 flex items-center gap-1">
                   <Lock className="w-3 h-3" />
                   Private
                 </span>
               )}
-              {matchData && matchData.isRevealed && (
-                <span className="text-xs bg-rose-50 text-rose-600 px-2 py-1 rounded-full border border-rose-200 flex items-center gap-1">
+              {matchData && !matchData.isAnonymous && (
+                <span className="text-xs bg-[#C5B4E3]/20 text-[#C5B4E3] px-2 py-1 rounded-full border border-[#C5B4E3]/30 flex items-center gap-1">
                   <Sparkles className="w-3 h-3" />
                   Revealed
                 </span>
@@ -386,12 +402,12 @@ export default function Chat() {
             <div className="flex items-center gap-2">
               <div
                 className={`w-2 h-2 rounded-full ${
-                  connected ? "bg-green-500" : "bg-gray-400"
+                  connected ? "bg-green-400" : "bg-white/40"
                 }`}
               />
               <span
                 className={`text-xs font-medium ${
-                  connected ? "text-green-600" : "text-gray-500"
+                  connected ? "text-green-400" : "text-white/50"
                 }`}
               >
                 {connected ? "Online" : "Offline"}
@@ -404,7 +420,7 @@ export default function Chat() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSkipMatch}
-                className="px-3 py-2 bg-rose-50 rounded-lg flex items-center gap-2 text-rose-600 hover:bg-rose-100 transition border border-rose-200 text-sm font-medium"
+                className="px-3 py-2 bg-[#C5B4E3]/10 rounded-lg flex items-center gap-2 text-[#C5B4E3] hover:bg-[#C5B4E3]/20 transition border border-[#C5B4E3]/30 text-sm font-medium"
                 title="Skip Match (1 credit)"
               >
                 <X className="w-4 h-4" />
@@ -412,7 +428,7 @@ export default function Chat() {
               </button>
 
               {matchData &&
-                !matchData.isRevealed &&
+                matchData.isAnonymous &&
                 (() => {
                   const userIsUser1 = matchData.user1Id === user?._id;
                   const alreadyRequested = userIsUser1
@@ -425,8 +441,8 @@ export default function Chat() {
                       disabled={alreadyRequested}
                       className={`px-3 py-2 rounded-lg flex items-center gap-2 text-sm font-medium border ${
                         alreadyRequested
-                          ? "bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed opacity-60"
-                          : "bg-rose-50 text-rose-600 hover:bg-rose-100 border-rose-200"
+                          ? "bg-white/5 text-white/30 border-white/10 cursor-not-allowed opacity-60"
+                          : "bg-[#C5B4E3]/10 text-[#C5B4E3] hover:bg-[#C5B4E3]/20 border-[#C5B4E3]/30"
                       }`}
                       title={
                         alreadyRequested
@@ -451,24 +467,24 @@ export default function Chat() {
       </div>
 
       {/* Messages */}
-      <div className="relative z-10 flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-gray-50">
+      <div className="relative z-10 flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#0A0A0F]">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <Loader2 className="w-12 h-12 text-rose-600 animate-spin mx-auto mb-4" />
-              <p className="text-gray-600">Loading messages...</p>
+              <Loader2 className="w-12 h-12 text-[#C5B4E3] animate-spin mx-auto mb-4" />
+              <p className="text-white/60">Loading messages...</p>
             </div>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-center">
-            <div className="bg-white rounded-3xl p-12 border border-gray-200 max-w-md shadow-sm">
-              <div className="w-20 h-20 bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-rose-200">
-                <MessageCircle className="w-10 h-10 text-rose-600" />
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 max-w-md shadow-sm">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#C5B4E3]/20 to-[#B5A3D3]/20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-[#C5B4E3]/30">
+                <MessageCircle className="w-10 h-10 text-[#C5B4E3]" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              <h3 className="text-2xl font-bold text-white mb-3">
                 Start a Conversation
               </h3>
-              <p className="text-gray-600">
+              <p className="text-white/60">
                 Send the first message to break the ice!
               </p>
             </div>
@@ -488,14 +504,14 @@ export default function Chat() {
                 <div
                   className={`max-w-[75%] sm:max-w-[60%] rounded-2xl px-5 py-3 ${
                     isMe
-                      ? "bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-md"
-                      : "bg-white text-gray-900 border border-gray-200 shadow-sm"
+                      ? "bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] shadow-md"
+                      : "bg-white/5 backdrop-blur-xl text-white border border-white/10 shadow-sm"
                   } ${message.isTemp ? "opacity-70" : ""}`}
                 >
                   <p className="break-words">{message.content}</p>
                   <p
                     className={`text-xs mt-1.5 ${
-                      isMe ? "text-white/80" : "text-gray-500"
+                      isMe ? "text-[#0A0A0F]/60" : "text-white/50"
                     }`}
                   >
                     {formatTime(message.createdAt)}
@@ -511,7 +527,7 @@ export default function Chat() {
       {/* Input */}
       <form
         onSubmit={handleSend}
-        className="relative z-10 bg-white border-t border-gray-200 p-4 sm:p-6 shadow-lg"
+        className="relative z-10 bg-[#0A0A0F]/95 backdrop-blur-xl border-t border-white/10 p-4 sm:p-6 shadow-lg"
       >
         <div className="flex gap-3 max-w-4xl mx-auto">
           <input
@@ -519,12 +535,12 @@ export default function Chat() {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 placeholder-gray-500 outline-none"
+            className="flex-1 px-5 py-3.5 bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-[#C5B4E3] focus:border-transparent text-white placeholder-white/40 outline-none"
           />
           <button
             type="submit"
             disabled={!newMessage.trim() || sending}
-            className="w-14 h-14 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl hover:from-rose-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center flex-shrink-0"
+            className="w-14 h-14 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl hover:from-[#B5A3D3] hover:to-[#A593C3] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg flex items-center justify-center flex-shrink-0"
           >
             {sending ? (
               <Loader2 className="w-6 h-6 animate-spin" />
@@ -538,22 +554,22 @@ export default function Chat() {
       {/* Profile Modal */}
       {showProfileModal && matchData && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           style={{ animation: "fadeIn 0.2s ease-out" }}
           onClick={() => setShowProfileModal(false)}
         >
           <div
-            className="bg-white rounded-3xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl border border-gray-100"
+            className="bg-[#15151F] backdrop-blur-xl rounded-3xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto shadow-2xl border border-white/10"
             style={{ animation: "scaleIn 0.3s ease-out" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 text-center">
+              <h2 className="text-2xl font-bold text-white text-center">
                 {getDisplayName()}
               </h2>
               <button
                 onClick={() => setShowProfileModal(false)}
-                className="absolute top-0 right-0 text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-full"
+                className="absolute top-0 right-0 text-white/40 hover:text-white transition-colors p-1 hover:bg-white/5 rounded-full"
                 aria-label="Close modal"
               >
                 <X className="w-6 h-6" />
@@ -562,32 +578,39 @@ export default function Chat() {
 
             <div className="space-y-4">
               <div className="flex flex-col items-center text-center">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-white text-3xl font-bold shadow-xl mb-3">
-                  {(matchData.isRevealed
-                    ? matchData.otherUser?.name?.[0]
-                    : matchData.otherUser?.maskedName?.[0] ||
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#C5B4E3] to-[#B5A3D3] flex items-center justify-center text-[#0A0A0F] text-3xl font-bold shadow-xl mb-3">
+                  {(!matchData.isAnonymous ? (
+                    <img
+                      src={matchData.otherUser?.photos?.[0]}
+                      alt="Match"
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    (
+                      matchData.otherUser?.maskedName?.[0] ||
                       matchData.otherUser?.name?.[0]
-                  )?.toUpperCase() || "?"}
+                    )?.toUpperCase()
+                  )) || "?"}
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-1">
+                {/* <h3 className="text-xl font-bold text-white mb-1">
                   {getDisplayName()}
-                </h3>
-                {matchData.isRevealed ? (
-                  <span className="text-xs bg-rose-50 text-rose-600 px-3 py-1 rounded-full border border-rose-200 flex items-center gap-1">
+                </h3> */}
+                {!matchData.isAnonymous ? (
+                  <span className="text-xs bg-[#C5B4E3]/20 text-[#C5B4E3] px-3 py-1 rounded-full border border-[#C5B4E3]/30 flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
                     Identity Revealed
                   </span>
                 ) : (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full border border-gray-200 flex items-center gap-1">
+                  <span className="text-xs bg-white/5 text-white/60 px-3 py-1 rounded-full border border-white/10 flex items-center gap-1">
                     <Lock className="w-3 h-3" />
                     Anonymous Profile
                   </span>
                 )}
               </div>
 
-              {!matchData.isRevealed && (
-                <div className="bg-rose-50 border border-rose-200 rounded-xl p-4">
-                  <p className="text-sm text-rose-700 text-center">
+              {matchData.isAnonymous && (
+                <div className="bg-[#C5B4E3]/10 border border-[#C5B4E3]/30 rounded-xl p-4">
+                  <p className="text-sm text-[#C5B4E3] text-center">
                     <span className="font-semibold">Privacy Protected</span>
                     <br />
                     Full profile will be visible once you both agree to reveal
@@ -595,14 +618,16 @@ export default function Chat() {
                   </p>
                 </div>
               )}
+              {console.log(matchData)}
 
+              {console.log(matchData)}
               {matchData.otherUser?.bio && (
-                <div className="bg-gray-50 rounded-xl p-4 max-h-[200px] sm:max-h-[250px] md:max-h-[300px] overflow-y-auto border border-gray-200">
-                  <h4 className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
+                <div className="bg-white/5 rounded-xl p-4 max-h-[200px] sm:max-h-[250px] md:max-h-[300px] overflow-y-auto border border-white/10">
+                  <h4 className="text-xs font-bold text-white/50 mb-2 uppercase tracking-wider">
                     Bio
                   </h4>
-                  <p className="text-gray-900 text-sm leading-relaxed break-words whitespace-pre-wrap">
-                    {matchData.isRevealed
+                  <p className="text-white text-sm leading-relaxed break-words whitespace-pre-wrap">
+                    {!matchData.isAnonymous
                       ? matchData.otherUser.bio
                       : matchData.otherUser.bio.length > 100
                       ? matchData.otherUser.bio.substring(0, 100) + "..."
@@ -613,25 +638,25 @@ export default function Chat() {
 
               {matchData.otherUser?.interests &&
                 matchData.otherUser.interests.length > 0 && (
-                  <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                    <h4 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h4 className="text-xs font-bold text-white/50 mb-3 uppercase tracking-wider">
                       Interests
                     </h4>
                     <div className="flex flex-wrap gap-2">
-                      {(matchData.isRevealed
+                      {(!matchData.isAnonymous
                         ? matchData.otherUser.interests
                         : matchData.otherUser.interests.slice(0, 3)
                       ).map((interest: string, index: number) => (
                         <span
                           key={index}
-                          className="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-sm"
+                          className="px-3 py-1.5 bg-[#C5B4E3]/20 text-[#C5B4E3] border border-[#C5B4E3]/30 rounded-lg text-sm"
                         >
                           {interest}
                         </span>
                       ))}
-                      {!matchData.isRevealed &&
+                      {matchData.isAnonymous &&
                         matchData.otherUser.interests.length > 3 && (
-                          <span className="px-3 py-1.5 bg-gray-200 text-gray-600 border border-gray-300 rounded-lg text-sm">
+                          <span className="px-3 py-1.5 bg-white/5 text-white/60 border border-white/10 rounded-lg text-sm">
                             +{matchData.otherUser.interests.length - 3} more
                           </span>
                         )}
@@ -639,19 +664,19 @@ export default function Chat() {
                   </div>
                 )}
 
-              {matchData.isRevealed && matchData.otherUser?.city && (
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <h4 className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">
+              {!matchData.isAnonymous && matchData.otherUser?.city && (
+                <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                  <h4 className="text-xs font-bold text-white/50 mb-2 uppercase tracking-wider">
                     Location
                   </h4>
-                  <p className="text-gray-900 flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-rose-600" />
+                  <p className="text-white flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-[#C5B4E3]" />
                     {matchData.otherUser.city}
                   </p>
                 </div>
               )}
 
-              {!matchData.isRevealed &&
+              {matchData.isAnonymous &&
                 (() => {
                   const userIsUser1 = matchData.user1Id === user?._id;
                   const alreadyRequested = userIsUser1
@@ -659,8 +684,8 @@ export default function Chat() {
                     : matchData.revealStatus?.user2Requested;
 
                   return (
-                    <div className="bg-gray-50 rounded-xl p-4 text-center border border-gray-200">
-                      <p className="text-sm text-gray-600 mb-3">
+                    <div className="bg-white/5 rounded-xl p-4 text-center border border-white/10">
+                      <p className="text-sm text-white/60 mb-3">
                         Want to see the full profile?
                       </p>
                       <button
@@ -671,8 +696,8 @@ export default function Chat() {
                         disabled={alreadyRequested}
                         className={`w-full px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
                           alreadyRequested
-                            ? "bg-gray-200 text-gray-500 cursor-not-allowed opacity-60"
-                            : "bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:from-rose-700 hover:to-pink-700 shadow-md"
+                            ? "bg-white/5 text-white/30 cursor-not-allowed opacity-60 border border-white/10"
+                            : "bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] hover:from-[#B5A3D3] hover:to-[#A593C3] shadow-md"
                         }`}
                       >
                         {alreadyRequested ? (
@@ -732,6 +757,21 @@ export default function Chat() {
             transform: scale(1);
           }
         }
+
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0);
+          }
+          25% {
+            transform: translate(10px, -10px);
+          }
+          50% {
+            transform: translate(-5px, 5px);
+          }
+          75% {
+            transform: translate(-10px, -5px);
+          }
+        }
       `}</style>
     </div>
   );
@@ -760,13 +800,29 @@ function ConversationsList() {
   };
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
-      <div className="relative z-10 bg-white border-b border-gray-200 sticky top-0 shadow-sm">
+    <div className="min-h-screen bg-[#0A0A0F] text-white relative overflow-hidden">
+      {/* Floating Particles Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {[...Array(30)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-[#C5B4E3] rounded-full opacity-20"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${10 + Math.random() * 20}s linear infinite`,
+              animationDelay: `${Math.random() * 10}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/10 sticky top-0 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-gradient-to-br from-[#C5B4E3] to-[#B5A3D3] rounded-lg flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-[#0A0A0F]" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Chats</h1>
+          <h1 className="text-2xl font-bold text-white">Chats</h1>
         </div>
       </div>
 
@@ -774,25 +830,25 @@ function ConversationsList() {
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
-              <Loader2 className="w-12 h-12 text-rose-600 animate-spin mx-auto mb-4" />
-              <p className="text-gray-600">Loading conversations...</p>
+              <Loader2 className="w-12 h-12 text-[#C5B4E3] animate-spin mx-auto mb-4" />
+              <p className="text-white/60">Loading conversations...</p>
             </div>
           </div>
         ) : conversations.length === 0 ? (
           <div className="flex flex-col items-center justify-center pb-20 text-center">
-            <div className="bg-white rounded-3xl p-12 border border-gray-200 max-w-md shadow-sm">
-              <div className="w-24 h-24 bg-gradient-to-br from-rose-100 to-pink-100 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-rose-200">
-                <MessageCircle className="w-12 h-12 text-rose-600" />
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-12 border border-white/10 max-w-md shadow-sm">
+              <div className="w-24 h-24 bg-gradient-to-br from-[#C5B4E3]/20 to-[#B5A3D3]/20 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[#C5B4E3]/30">
+                <MessageCircle className="w-12 h-12 text-[#C5B4E3]" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              <h2 className="text-3xl font-bold text-white mb-3">
                 No Conversations Yet
               </h2>
-              <p className="text-gray-600 mb-8">
+              <p className="text-white/60 mb-8">
                 Start matching to begin chatting with people!
               </p>
               <button
                 onClick={() => navigate("/home")}
-                className="px-8 py-4 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl font-semibold hover:from-rose-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
+                className="px-8 py-4 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] transition-all shadow-lg hover:shadow-xl flex items-center gap-2 mx-auto"
               >
                 <Heart className="w-5 h-5" />
                 Find Matches
@@ -804,12 +860,12 @@ function ConversationsList() {
             <div
               key={conv.matchId}
               onClick={() => navigate(`/chat/${conv.matchId}`)}
-              className="bg-white hover:bg-gray-50 border border-gray-200 hover:border-rose-200 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-md animate-slide-up"
+              className="bg-white/5 backdrop-blur-xl hover:bg-white/10 border border-white/10 hover:border-[#C5B4E3]/30 rounded-2xl p-5 cursor-pointer transition-all hover:shadow-md animate-slide-up"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="flex items-center gap-4">
                 <div className="relative flex-shrink-0">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-rose-100 to-pink-100 border border-rose-200">
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-gradient-to-br from-[#C5B4E3]/20 to-[#B5A3D3]/20 border border-[#C5B4E3]/30">
                     {(
                       conv.isAnonymous
                         ? conv.otherUser.blurredPhotos?.[0]
@@ -825,74 +881,91 @@ function ConversationsList() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-rose-500 to-pink-600">
-                        <span className="text-white text-2xl font-bold">
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#C5B4E3] to-[#B5A3D3]">
+                        <span className="text-[#0A0A0F] text-2xl font-bold">
                           {conv.otherUser.name?.[0]?.toUpperCase() || "?"}
                         </span>
                       </div>
                     )}
                   </div>
                   {conv.unreadCount > 0 && (
-                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-rose-500 to-pink-600 text-white text-xs font-bold rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] text-xs font-bold rounded-full flex items-center justify-center border-2 border-[#0A0A0F] shadow-lg">
                       {conv.unreadCount}
                     </div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-gray-900 text-lg truncate">
+                    <h3 className="font-semibold text-white text-lg truncate">
                       {conv.otherUser.name}
                       {conv.otherUser.age && `, ${conv.otherUser.age}`}
                     </h3>
                     {conv.isAnonymous && (
-                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full border border-gray-200 flex-shrink-0 flex items-center gap-1">
+                      <span className="text-xs bg-white/5 text-white/60 px-2 py-1 rounded-full border border-white/10 flex-shrink-0 flex items-center gap-1">
                         <Lock className="w-3 h-3" />
                         Private
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 truncate">
+                  <p className="text-sm text-white/60 truncate">
                     {conv.lastMessage?.content || "Start a conversation"}
                   </p>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                <ChevronRight className="w-5 h-5 text-white/40 flex-shrink-0" />
               </div>
             </div>
           ))
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 px-4 py-3 z-50 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0A0A0F]/95 backdrop-blur-xl border-t border-white/10 px-4 py-3 z-50 shadow-lg">
         <div className="max-w-md mx-auto flex justify-around">
           <button
             onClick={() => navigate("/home")}
-            className="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-all"
+            className="flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-all"
           >
-            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-all">
+            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
               <HomeIcon className="w-5 h-5" />
             </div>
             <span className="text-xs font-medium">Home</span>
           </button>
           <button
             onClick={() => navigate("/chat")}
-            className="flex flex-col items-center gap-1.5 text-rose-600 transition-all"
+            className="flex flex-col items-center gap-1.5 text-[#C5B4E3] transition-all"
           >
-            <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center border-2 border-rose-300">
+            <div className="w-12 h-12 bg-[#C5B4E3]/20 rounded-xl flex items-center justify-center border-2 border-[#C5B4E3]/30">
               <MessageCircle className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold">Chats</span>
           </button>
           <button
             onClick={() => navigate("/profile")}
-            className="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-all"
+            className="flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-all"
           >
-            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-all">
+            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
               <UserIcon className="w-5 h-5" />
             </div>
             <span className="text-xs font-medium">Profile</span>
           </button>
         </div>
       </div>
+
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0);
+          }
+          25% {
+            transform: translate(10px, -10px);
+          }
+          50% {
+            transform: translate(-5px, 5px);
+          }
+          75% {
+            transform: translate(-10px, -5px);
+          }
+        }
+      `}</style>
     </div>
   );
 }

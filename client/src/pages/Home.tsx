@@ -232,18 +232,18 @@ export default function Home() {
       : currentMatch.revealStatus?.user2Requested;
 
     return (
-      <div className="bg-white rounded-3xl overflow-hidden max-w-md w-full border border-gray-100 shadow-xl">
+      <div className="bg-white/5 backdrop-blur-xl rounded-3xl overflow-hidden max-w-md w-full border border-white/10 shadow-xl">
         {/* Badge */}
         <div
           className={`px-6 py-4 flex justify-between items-center ${
             isRevealed
-              ? "bg-gradient-to-r from-rose-50 to-pink-50 border-b border-rose-200"
-              : "bg-gray-50 border-b border-gray-200"
+              ? "bg-gradient-to-r from-[#C5B4E3]/20 to-[#B5A3D3]/20 border-b border-[#C5B4E3]/30"
+              : "bg-white/5 border-b border-white/10"
           }`}
         >
           <span
             className={`text-sm font-semibold flex items-center gap-2 ${
-              isRevealed ? "text-rose-700" : "text-gray-700"
+              isRevealed ? "text-[#C5B4E3]" : "text-white/70"
             }`}
           >
             {isRevealed ? (
@@ -253,14 +253,14 @@ export default function Home() {
             )}
             {isRevealed ? "Revealed Profile" : "Anonymous Profile"}
           </span>
-          <span className="text-sm text-gray-600 flex items-center gap-1.5">
+          <span className="text-sm text-white/60 flex items-center gap-1.5">
             <MapPin className="w-4 h-4" />
             {currentMatch.distance} km
           </span>
         </div>
 
         {/* Photo */}
-        <div className="relative h-96 sm:h-[28rem] overflow-hidden bg-gray-100">
+        <div className="relative h-96 sm:h-[28rem] overflow-hidden bg-white/5">
           <img
             src={photos[0]}
             alt="Match"
@@ -281,27 +281,25 @@ export default function Home() {
         </div>
 
         {/* Info */}
-        <div className="p-6 space-y-5 bg-white">
+        <div className="p-6 space-y-5 bg-white/5 backdrop-blur-xl">
           {currentMatch.bio && (
-            <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
-              <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
+            <div className="bg-white/5 rounded-2xl p-5 border border-white/10">
+              <h3 className="text-xs font-bold text-white/50 mb-3 uppercase tracking-wider">
                 About
               </h3>
-              <p className="text-gray-900 leading-relaxed">
-                {currentMatch.bio}
-              </p>
+              <p className="text-white leading-relaxed">{currentMatch.bio}</p>
             </div>
           )}
 
           <div>
-            <h3 className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-white/50 mb-3 uppercase tracking-wider">
               Interests
             </h3>
             <div className="flex flex-wrap gap-2">
               {currentMatch.interests.map((interest: string) => (
                 <span
                   key={interest}
-                  className="px-4 py-2 bg-rose-50 text-rose-700 border border-rose-200 rounded-full text-sm font-medium"
+                  className="px-4 py-2 bg-[#C5B4E3]/20 text-[#C5B4E3] border border-[#C5B4E3]/30 rounded-full text-sm font-medium"
                 >
                   {interest}
                 </span>
@@ -311,15 +309,15 @@ export default function Home() {
 
           {/* Reveal Status Banner */}
           {isRevealed ? (
-            <div className="bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-200 rounded-2xl p-4 text-center">
-              <p className="text-rose-700 font-semibold flex items-center justify-center gap-2">
+            <div className="bg-gradient-to-r from-[#C5B4E3]/20 to-[#B5A3D3]/20 border border-[#C5B4E3]/30 rounded-2xl p-4 text-center">
+              <p className="text-[#C5B4E3] font-semibold flex items-center justify-center gap-2">
                 <Sparkles className="w-5 h-5" />
                 Profile revealed! You can now see everything.
               </p>
             </div>
           ) : (
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 text-center">
-              <p className="text-gray-600 flex items-center justify-center gap-2 text-sm">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">
+              <p className="text-white/60 flex items-center justify-center gap-2 text-sm">
                 <Lock className="w-4 h-4" />
                 Some details are hidden until you both accept reveal
               </p>
@@ -332,9 +330,9 @@ export default function Home() {
               <button
                 onClick={handleSkip}
                 className="w-full px-6 py-3.5 
-                      bg-white border-2 border-rose-300 text-rose-600 
+                      bg-white/5 border-2 border-[#C5B4E3]/30 text-[#C5B4E3] 
                       rounded-xl font-semibold 
-                      hover:bg-rose-50 hover:border-rose-400 
+                      hover:bg-[#C5B4E3]/10 hover:border-[#C5B4E3]/50 
                       transition-all 
                       flex items-center justify-center gap-2
                       text-base"
@@ -352,8 +350,8 @@ export default function Home() {
                           text-base 
                           ${
                             alreadyRequested
-                              ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                              : "bg-gradient-to-r from-rose-600 to-pink-600 text-white hover:from-rose-700 hover:to-pink-700 shadow-md"
+                              ? "bg-white/5 text-white/30 cursor-not-allowed border border-white/10"
+                              : "bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] hover:from-[#B5A3D3] hover:to-[#A593C3] shadow-md"
                           }`}
               >
                 {alreadyRequested ? (
@@ -373,7 +371,7 @@ export default function Home() {
 
           <button
             onClick={() => navigate(`/chat/${currentMatch.matchId}`)}
-            className="w-full px-6 py-4 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl font-semibold hover:from-rose-700 hover:to-pink-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg"
+            className="w-full px-6 py-4 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg"
           >
             <MessageCircle className="w-5 h-5" />
             {isRevealed ? "Continue Chat" : "Start Chat"}
@@ -384,27 +382,41 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#0A0A0F] text-white relative overflow-hidden">
+      {/* Floating Particles Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {[...Array(30)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-[#C5B4E3] rounded-full opacity-20"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animation: `float ${10 + Math.random() * 20}s linear infinite`,
+              animationDelay: `${Math.random() * 10}s`,
+            }}
+          />
+        ))}
+      </div>
+
       {/* Header */}
-      <div className="fixed w-full z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-sm top-0">
+      <div className="fixed w-full z-50 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/10 shadow-sm top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg flex items-center justify-center shadow-sm">
-              <span className="text-xl text-white font-bold">S</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-[#C5B4E3] to-[#B5A3D3] rounded-lg flex items-center justify-center shadow-sm">
+              <span className="text-xl text-[#0A0A0F] font-bold">S</span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
-              START
-            </h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-white">START</h1>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
-            <div className="bg-rose-50 px-4 py-2 rounded-lg flex items-center gap-2 font-semibold border border-rose-200">
-              <Sparkles className="w-4 h-4 text-rose-600" />
-              <span className="text-rose-700">{credits}</span>
+            <div className="bg-[#C5B4E3]/20 px-4 py-2 rounded-lg flex items-center gap-2 font-semibold border border-[#C5B4E3]/30">
+              <Sparkles className="w-4 h-4 text-[#C5B4E3]" />
+              <span className="text-[#C5B4E3]">{credits}</span>
             </div>
             <button
               onClick={() => navigate("/profile")}
-              className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-gray-700 hover:bg-gray-200 transition border border-gray-200"
+              className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition border border-white/10"
             >
               <User className="w-5 h-5" />
             </button>
@@ -414,22 +426,22 @@ export default function Home() {
 
       {/* Reveal Requests Banner */}
       {pendingRevealRequests.length > 0 && (
-        <div className="relative z-10 bg-gradient-to-r from-rose-50 to-pink-50 border-b border-rose-200 py-4 px-4 mt-[72px]">
+        <div className="relative z-10 bg-gradient-to-r from-[#C5B4E3]/20 to-[#B5A3D3]/20 border-b border-[#C5B4E3]/30 py-4 px-4 mt-[72px]">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-6 h-6 text-rose-600" />
+                <div className="w-12 h-12 bg-[#C5B4E3]/20 rounded-xl flex items-center justify-center flex-shrink-0 border border-[#C5B4E3]/30">
+                  <Sparkles className="w-6 h-6 text-[#C5B4E3]" />
                 </div>
                 <div>
-                  <p className="font-bold text-lg text-gray-900">
+                  <p className="font-bold text-lg text-white">
                     {pendingRevealRequests.length}{" "}
                     {pendingRevealRequests.length === 1
                       ? "person wants"
                       : "people want"}{" "}
                     to reveal!
                   </p>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-white/60">
                     Accept to see their full profile
                   </p>
                 </div>
@@ -444,14 +456,14 @@ export default function Home() {
                     <div key={match._id} className="flex gap-2 flex-wrap">
                       <button
                         onClick={() => handleAcceptReveal(match._id)}
-                        className="bg-gradient-to-r from-rose-600 to-pink-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:from-rose-700 hover:to-pink-700 transition-all shadow-sm text-sm whitespace-nowrap flex items-center gap-2"
+                        className="bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] px-5 py-2.5 rounded-lg font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] transition-all shadow-sm text-sm whitespace-nowrap flex items-center gap-2"
                       >
                         <Check className="w-4 h-4" />
                         Accept {displayName} (3 credits)
                       </button>
                       <button
                         onClick={() => handleRejectReveal(match._id)}
-                        className="bg-white text-gray-700 px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-50 transition-all border border-gray-200 text-sm"
+                        className="bg-white/5 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-white/10 transition-all border border-white/10 text-sm"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -468,19 +480,19 @@ export default function Home() {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-80px)] p-4 pt-24 pb-32">
         {!currentMatch ? (
           <div className="text-center max-w-lg">
-            <div className="w-24 h-24 bg-gradient-to-br from-rose-100 to-pink-100 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-sm border border-rose-200">
-              <Heart className="w-12 h-12 text-rose-600" />
+            <div className="w-24 h-24 bg-gradient-to-br from-[#C5B4E3]/20 to-[#B5A3D3]/20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-sm border border-[#C5B4E3]/30">
+              <Heart className="w-12 h-12 text-[#C5B4E3]" />
             </div>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl font-bold text-white mb-4">
               Ready to find your match?
             </h2>
-            <p className="text-gray-600 text-lg mb-8">
+            <p className="text-white/60 text-lg mb-8">
               Click below to discover someone special
             </p>
             <button
               onClick={() => handleFindMatch()}
               disabled={loading || credits < CREDIT_COSTS.FIND_MATCH}
-              className="px-10 py-5 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl text-xl font-semibold hover:from-rose-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-lg hover:shadow-xl disabled:transform-none flex items-center gap-3 mx-auto"
+              className="px-10 py-5 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl text-xl font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-lg hover:shadow-xl disabled:transform-none flex items-center gap-3 mx-auto"
             >
               {loading ? (
                 <>
@@ -494,31 +506,31 @@ export default function Home() {
                 </>
               )}
             </button>
-            <p className="text-sm text-gray-500 mt-3 flex items-center justify-center gap-2">
-              <Sparkles className="w-4 h-4 text-rose-600" />
+            <p className="text-sm text-white/50 mt-3 flex items-center justify-center gap-2">
+              <Sparkles className="w-4 h-4 text-[#C5B4E3]" />
               Uses 1 credit
             </p>
 
             {credits === 0 && (
-              <div className="mt-8 p-6 bg-amber-50 border border-amber-200 rounded-xl">
-                <p className="text-amber-700 font-bold text-lg mb-2">
+              <div className="mt-8 p-6 bg-amber-400/10 border border-amber-400/30 rounded-xl">
+                <p className="text-amber-400 font-bold text-lg mb-2">
                   Out of credits!
                 </p>
-                <p className="text-amber-600 text-sm">
+                <p className="text-amber-300/80 text-sm">
                   Come back tomorrow for 5 fresh credits
                 </p>
               </div>
             )}
 
             {/* Tips */}
-            <div className="mt-8 p-6 bg-rose-50 rounded-xl text-left border border-rose-200">
+            <div className="mt-8 p-6 bg-[#C5B4E3]/10 rounded-xl text-left border border-[#C5B4E3]/30">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-rose-600" />
+                <div className="w-10 h-10 bg-[#C5B4E3]/20 rounded-lg flex items-center justify-center flex-shrink-0 border border-[#C5B4E3]/30">
+                  <Sparkles className="w-5 h-5 text-[#C5B4E3]" />
                 </div>
                 <div>
-                  <p className="text-gray-900 font-semibold mb-1">Pro Tip</p>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-white font-semibold mb-1">Pro Tip</p>
+                  <p className="text-white/60 text-sm">
                     Respond within 24 hours for better matches and stronger
                     connections
                   </p>
@@ -534,40 +546,40 @@ export default function Home() {
       {/* Matching Modal */}
       {showMatchingModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl p-12 max-w-md w-full shadow-2xl animate-in zoom-in duration-300">
+          <div className="bg-[#15151F] backdrop-blur-xl rounded-3xl p-12 max-w-md w-full shadow-2xl animate-in zoom-in duration-300 border border-white/10">
             <div className="text-center">
               {/* Animated Heart Icon */}
               <div className="relative w-24 h-24 mx-auto mb-8">
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-500 to-pink-600 rounded-3xl flex items-center justify-center animate-pulse">
-                  <Heart className="w-12 h-12 text-white" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#C5B4E3] to-[#B5A3D3] rounded-3xl flex items-center justify-center animate-pulse">
+                  <Heart className="w-12 h-12 text-[#0A0A0F]" />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-br from-rose-500 to-pink-600 rounded-3xl opacity-50 animate-ping" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#C5B4E3] to-[#B5A3D3] rounded-3xl opacity-50 animate-ping" />
               </div>
 
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              <h2 className="text-3xl font-bold text-white mb-4">
                 Finding Your Match...
               </h2>
-              <p className="text-gray-600 text-lg mb-6">
+              <p className="text-white/60 text-lg mb-6">
                 Connecting you with someone special
               </p>
 
               {/* Loading dots */}
               <div className="flex items-center justify-center gap-2">
                 <div
-                  className="w-3 h-3 bg-rose-400 rounded-full animate-bounce"
+                  className="w-3 h-3 bg-[#C5B4E3] rounded-full animate-bounce"
                   style={{ animationDelay: "0ms" }}
                 />
                 <div
-                  className="w-3 h-3 bg-pink-400 rounded-full animate-bounce"
+                  className="w-3 h-3 bg-[#B5A3D3] rounded-full animate-bounce"
                   style={{ animationDelay: "150ms" }}
                 />
                 <div
-                  className="w-3 h-3 bg-rose-400 rounded-full animate-bounce"
+                  className="w-3 h-3 bg-[#C5B4E3] rounded-full animate-bounce"
                   style={{ animationDelay: "300ms" }}
                 />
               </div>
 
-              <p className="text-gray-400 text-sm mt-8">
+              <p className="text-white/40 text-sm mt-8">
                 This may take a few moments...
               </p>
             </div>
@@ -578,32 +590,32 @@ export default function Home() {
       {/* Out of Credits Modal */}
       {showOutOfCredits && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+          <div className="bg-[#15151F] backdrop-blur-xl rounded-3xl p-8 max-w-md w-full shadow-2xl border border-white/10">
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-amber-200">
-                <Sparkles className="w-10 h-10 text-amber-600" />
+              <div className="w-20 h-20 bg-gradient-to-br from-amber-400/20 to-yellow-400/20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-amber-400/30">
+                <Sparkles className="w-10 h-10 text-amber-400" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              <h2 className="text-3xl font-bold text-white mb-3">
                 Out of Credits!
               </h2>
-              <p className="text-gray-600 mb-2">
+              <p className="text-white/60 mb-2">
                 You've used all 5 credits for today.
               </p>
-              <p className="text-gray-500 text-sm mb-8">
+              <p className="text-white/50 text-sm mb-8">
                 Credits refresh at midnight. You can still chat with your
                 current matches!
               </p>
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => navigate("/chats")}
-                  className="w-full px-6 py-4 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl font-semibold hover:from-rose-700 hover:to-pink-700 transition-all shadow-lg flex items-center justify-center gap-2"
+                  className="w-full px-6 py-4 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] transition-all shadow-lg flex items-center justify-center gap-2"
                 >
                   <MessageCircle className="w-5 h-5" />
                   Go to Chats
                 </button>
                 <button
                   onClick={() => setShowOutOfCredits(false)}
-                  className="w-full px-6 py-4 bg-gray-100 rounded-xl text-gray-700 hover:bg-gray-200 transition-all font-semibold"
+                  className="w-full px-6 py-4 bg-white/5 rounded-xl text-white hover:bg-white/10 transition-all font-semibold border border-white/10"
                 >
                   Got it
                 </button>
@@ -614,37 +626,55 @@ export default function Home() {
       )}
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-gray-200 px-4 py-3 z-50 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0A0A0F]/95 backdrop-blur-xl border-t border-white/10 px-4 py-3 z-50 shadow-lg">
         <div className="max-w-md mx-auto flex justify-around">
           <button
             onClick={() => navigate("/home")}
-            className="flex flex-col items-center gap-1.5 text-rose-600 transition-all"
+            className="flex flex-col items-center gap-1.5 text-[#C5B4E3] transition-all"
           >
-            <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center border-2 border-rose-300">
+            <div className="w-12 h-12 bg-[#C5B4E3]/20 rounded-xl flex items-center justify-center border-2 border-[#C5B4E3]/30">
               <HomeIcon className="w-5 h-5" />
             </div>
             <span className="text-xs font-semibold">Home</span>
           </button>
           <button
             onClick={() => navigate("/chats")}
-            className="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-all"
+            className="flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-all"
           >
-            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-all">
+            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
               <MessageCircle className="w-5 h-5" />
             </div>
             <span className="text-xs font-medium">Chats</span>
           </button>
           <button
             onClick={() => navigate("/profile")}
-            className="flex flex-col items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-all"
+            className="flex flex-col items-center gap-1.5 text-white/40 hover:text-white/70 transition-all"
           >
-            <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center hover:bg-gray-100 transition-all">
+            <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center hover:bg-white/10 transition-all">
               <User className="w-5 h-5" />
             </div>
             <span className="text-xs font-medium">Profile</span>
           </button>
         </div>
       </div>
+
+      {/* Animations */}
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translate(0, 0);
+          }
+          25% {
+            transform: translate(10px, -10px);
+          }
+          50% {
+            transform: translate(-5px, 5px);
+          }
+          75% {
+            transform: translate(-10px, -5px);
+          }
+        }
+      `}</style>
     </div>
   );
 }

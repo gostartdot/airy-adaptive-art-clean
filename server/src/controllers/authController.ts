@@ -155,8 +155,14 @@ export const completeOnboarding = async (req: Request, res: Response) => {
       genderCustom,
       showGender,
       city,
+      cityOther,
       photos,
+      heightFeet,
+      heightInches,
+      religion,
       bio,
+      simplePleasures,
+      goCrazyFor,
       interests,
       preferences,
       isWorkingProfessional,
@@ -176,13 +182,16 @@ export const completeOnboarding = async (req: Request, res: Response) => {
     if (!position) {
       return sendError(res, 'Please enter a position');
     }
-    if (!workingSince) {
+    if (gender==="man" && !workingSince ) {
       return sendError(res, 'Please enter a working since date');
     }
 
     // Validate salary proof images
-    if (!salaryProofImages || salaryProofImages.length < 2) {
-      return sendError(res, 'Please upload at least 2 salary proof images');
+    if (
+      gender === "man" &&
+      (!salaryProofImages || salaryProofImages.length < 2)
+    ) {
+      return sendError(res, "Please upload at least 2 salary proof images");
     }
 
     // Calculate age
@@ -205,8 +214,14 @@ export const completeOnboarding = async (req: Request, res: Response) => {
       genderCustom,
       showGender: showGender !== false,
       city,
+      cityOther,
       photos,
+      heightFeet,
+      heightInches,
+      religion,
       bio,
+      simplePleasures,
+      goCrazyFor,
       interests,
       preferences,
       isWorkingProfessional: true,
