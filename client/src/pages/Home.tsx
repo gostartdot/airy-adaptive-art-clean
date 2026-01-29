@@ -140,62 +140,62 @@ export default function Home() {
     }
   };
 
-  const handleSkip = async () => {
-    if (!currentMatch) return;
+  // const handleSkip = async () => {
+  //   if (!currentMatch) return;
 
-    if (credits < CREDIT_COSTS.SKIP_MATCH) {
-      setShowOutOfCredits(true);
-      return;
-    }
+  //   if (credits < CREDIT_COSTS.SKIP_MATCH) {
+  //     setShowOutOfCredits(true);
+  //     return;
+  //   }
 
-    if (
-      !confirm(
-        "Skip this match? You will lose 1 credit and won't see this profile again.",
-      )
-    ) {
-      return;
-    }
+  //   if (
+  //     !confirm(
+  //       "Skip this match? You will lose 1 credit and won't see this profile again.",
+  //     )
+  //   ) {
+  //     return;
+  //   }
 
-    try {
-      await matchService.skipMatch(currentMatch.matchId);
+  //   try {
+  //     await matchService.skipMatch(currentMatch.matchId);
 
-      const creditsAfterSkip = credits - CREDIT_COSTS.SKIP_MATCH;
+  //     const creditsAfterSkip = credits - CREDIT_COSTS.SKIP_MATCH;
 
-      setCredits(creditsAfterSkip);
-      setCurrentMatch(null);
+  //     setCredits(creditsAfterSkip);
+  //     setCurrentMatch(null);
 
-      handleFindMatch(creditsAfterSkip);
-    } catch (error: any) {
-      alert(error.response?.data?.error || "Failed to skip match");
-    }
-  };
+  //     handleFindMatch(creditsAfterSkip);
+  //   } catch (error: any) {
+  //     alert(error.response?.data?.error || "Failed to skip match");
+  //   }
+  // };
 
-  const handleRequestReveal = async () => {
-    if (!currentMatch) return;
+  // const handleRequestReveal = async () => {
+  //   if (!currentMatch) return;
 
-    if (credits < CREDIT_COSTS.REQUEST_REVEAL) {
-      setShowOutOfCredits(true);
-      return;
-    }
+  //   if (credits < CREDIT_COSTS.REQUEST_REVEAL) {
+  //     setShowOutOfCredits(true);
+  //     return;
+  //   }
 
-    if (
-      !confirm(
-        `Request to reveal profiles? This costs ${CREDIT_COSTS.REQUEST_REVEAL} credits. Both must accept to reveal.`,
-      )
-    ) {
-      return;
-    }
+  //   if (
+  //     !confirm(
+  //       `Request to reveal profiles? This costs ${CREDIT_COSTS.REQUEST_REVEAL} credits. Both must accept to reveal.`,
+  //     )
+  //   ) {
+  //     return;
+  //   }
 
-    try {
-      await matchService.requestReveal(currentMatch.matchId);
-      setCredits(credits - CREDIT_COSTS.REQUEST_REVEAL);
-      alert(
-        "Reveal request sent! You can chat while waiting for their response.",
-      );
-    } catch (error: any) {
-      alert(error.response?.data?.error || "Failed to request reveal");
-    }
-  };
+  //   try {
+  //     await matchService.requestReveal(currentMatch.matchId);
+  //     setCredits(credits - CREDIT_COSTS.REQUEST_REVEAL);
+  //     alert(
+  //       "Reveal request sent! You can chat while waiting for their response.",
+  //     );
+  //   } catch (error: any) {
+  //     alert(error.response?.data?.error || "Failed to request reveal");
+  //   }
+  // };
 
   const handleAcceptReveal = async (matchId: string) => {
     if (credits < CREDIT_COSTS.ACCEPT_REVEAL) {
@@ -326,10 +326,10 @@ export default function Home() {
       ? currentMatch.photos || currentMatch.blurredPhotos
       : currentMatch.blurredPhotos;
 
-    const userIsUser1 = currentMatch.user1Id === user?._id;
-    const alreadyRequested = userIsUser1
-      ? currentMatch.revealStatus?.user1Requested
-      : currentMatch.revealStatus?.user2Requested;
+    // const userIsUser1 = currentMatch.user1Id === user?._id;
+    // const alreadyRequested = userIsUser1
+    //   ? currentMatch.revealStatus?.user1Requested
+    //   : currentMatch.revealStatus?.user2Requested;
 
     return (
       <div className="bg-white/5 backdrop-blur-xl rounded-3xl overflow-hidden max-w-md w-full border border-white/10 shadow-xl">
