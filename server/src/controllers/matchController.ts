@@ -233,7 +233,8 @@ export const skipMatch = async (req: AuthRequest, res: Response) => {
     });
 
     // Deduct credit
-    await deductCredits(userId, 'skip_match', 1, matchId);
+    //set 0 credit cost for testing
+    await deductCredits(userId, 'skip_match', 0, matchId);
 
     return sendSuccess(res, { matchId }, 'Match skipped');
   } catch (error) {
@@ -275,7 +276,8 @@ export const requestReveal = async (req: AuthRequest, res: Response) => {
     }
 
     // Deduct credits (only after all checks pass)
-    await deductCredits(userId, 'request_reveal', 1, matchId);
+    //set 0 credit cost for testing
+    await deductCredits(userId, 'request_reveal', 0, matchId);
 
     // Update reveal request
     if (isUser1) {
@@ -336,7 +338,8 @@ export const acceptReveal = async (req: AuthRequest, res: Response) => {
     }
 
     // Deduct credits
-    await deductCredits(userId, 'accept_reveal', 1, matchId);
+    //set 0 credit cost for testing
+    await deductCredits(userId, 'accept_reveal', 0, matchId);
 
     // Update reveal status
     if (isUser1) {

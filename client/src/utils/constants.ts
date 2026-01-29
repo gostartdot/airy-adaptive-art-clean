@@ -1,8 +1,8 @@
 export const CREDIT_COSTS = {
   FIND_MATCH: 1,
-  SKIP_MATCH: 1,
-  REQUEST_REVEAL: 1,
-  ACCEPT_REVEAL: 1,
+  SKIP_MATCH: 0,
+  REQUEST_REVEAL: 0,
+  ACCEPT_REVEAL: 0,
 } as const;
 
 export const DAILY_CREDIT_ALLOCATION = 5;

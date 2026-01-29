@@ -25,6 +25,7 @@ import {
   Loader2,
   Clock,
 } from "lucide-react";
+import { toast } from "sonner";
 
 export default function Chat() {
   const { matchId } = useParams();
@@ -247,7 +248,7 @@ export default function Chat() {
 
     if (
       !confirm(
-        "Skip this match? You will lose 1 credit and won't see this profile again. All chats will be closed."
+        "Skip this match? You won't see this profile again. All chats will be closed."
       )
     ) {
       return;
@@ -256,7 +257,7 @@ export default function Chat() {
     try {
       await matchService.skipMatch(matchId);
       setCredits(credits - CREDIT_COSTS.SKIP_MATCH);
-      alert("Match skipped successfully");
+      toast.success("Match skipped successfully");
       navigate("/chats");
     } catch (error: any) {
       alert(error.response?.data?.error || "Failed to skip match");
@@ -277,31 +278,31 @@ export default function Chat() {
       : matchData.revealStatus?.user2Requested;
 
     if (alreadyRequested) {
-      alert(
+      toast(
         "You have already requested to reveal this profile. Waiting for their response."
       );
       return;
     }
 
-    if (credits < CREDIT_COSTS.REQUEST_REVEAL) {
-      alert(
-        `Not enough credits! You need ${CREDIT_COSTS.REQUEST_REVEAL} credits to request reveal.`
-      );
-      return;
-    }
+    // if (credits < CREDIT_COSTS.REQUEST_REVEAL) {
+    //   alert(
+    //     `Not enough credits! You need ${CREDIT_COSTS.REQUEST_REVEAL} credits to request reveal.`
+    //   );
+    //   return;
+    // }
 
-    if (
-      !confirm(
-        `Request to reveal profiles? This costs ${CREDIT_COSTS.REQUEST_REVEAL} credits. Both must accept to reveal.`
-      )
-    ) {
-      return;
-    }
+    // if (
+    //   !confirm(
+    //     `Request to reveal profiles? This costs ${CREDIT_COSTS.REQUEST_REVEAL} credits. Both must accept to reveal.`
+    //   )
+    // ) {
+    //   return;
+    // }
 
     try {
       await matchService.requestReveal(matchId);
       setCredits(credits - CREDIT_COSTS.REQUEST_REVEAL);
-      alert(
+      toast(
         "✨ Reveal request sent! You can chat while waiting for their response."
       );
       fetchMatchData();
@@ -710,7 +711,7 @@ export default function Chat() {
                         ) : (
                           <>
                             <Heart className="w-5 h-5" />
-                            Request Identity Reveal (1 credit)
+                            Request Identity Reveal
                           </>
                         )}
                       </button>

@@ -19,6 +19,7 @@ import {
   Loader2,
   Clock,
 } from "lucide-react";
+import Logo from "../components/common/Logo";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -325,7 +326,7 @@ export default function Home() {
           )}
 
           {/* Action Buttons */}
-          {!isRevealed && (
+          {/* {!isRevealed && (
             <div className="flex gap-3">
               <button
                 onClick={handleSkip}
@@ -367,7 +368,7 @@ export default function Home() {
                 )}
               </button>
             </div>
-          )}
+          )} */}
 
           <button
             onClick={() => navigate(`/chat/${currentMatch.matchId}`)}
@@ -402,13 +403,13 @@ export default function Home() {
       {/* Header */}
       <div className="fixed w-full z-50 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/10 shadow-sm top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-[#C5B4E3] to-[#B5A3D3] rounded-lg flex items-center justify-center shadow-sm">
               <span className="text-xl text-[#0A0A0F] font-bold">S</span>
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-white">START</h1>
-          </div>
-
+          </div> */}
+          <Logo/>
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="bg-[#C5B4E3]/20 px-4 py-2 rounded-lg flex items-center gap-2 font-semibold border border-[#C5B4E3]/30">
               <Sparkles className="w-4 h-4 text-[#C5B4E3]" />
