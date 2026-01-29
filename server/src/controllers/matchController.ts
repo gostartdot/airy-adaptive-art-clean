@@ -42,69 +42,302 @@ const deductCredits = async (userId: string, action: string, amount: number, mat
 // @desc    Find a new match
 // @route   POST /api/matches/find
 // @access  Private
+
+
+// export const findMatch = async (req: AuthRequest, res: Response) => {
+//   try {
+//     const userId = req.userId!;
+//     const user = await User.findById(userId);
+//     const { filters } = req.body;
+//     console.log(filters)
+
+//     if (!user) {
+//       return sendError(res, 'User not found', 404);
+//     }
+
+//     // Check credits
+//     if (user.credits < 1) {
+//       return sendError(res, 'Insufficient credits', 400);
+//     }
+
+//     // STEP 1: Try to find REAL users first
+//     // Filter out AI persona IDs from matched/skipped users (only use real user ObjectIds)
+//     const realMatchedUsers = (user.matchedUsers || []).filter((id: any) => !isAIPersonaId(id.toString()));
+//     const realSkippedUsers = (user.skippedUsers || []).filter((id: any) => !isAIPersonaId(id.toString()));
+    
+//     // Check if user has preferences set
+//     if (!user.preferences) {
+//       return sendError(res, 'User preferences not set. Please complete your profile.', 400);
+//     }
+    
+//     const potentialMatches = await User.find({
+//       _id: {
+//         $ne: userId,
+//         $nin: [...realMatchedUsers, ...realSkippedUsers],
+//       },
+//       // gender: { $in: user.preferences.showMe },
+//       gender: { $in: filters.gender },
+//       // age: {
+//       //   $gte: user.preferences.ageRange.min,
+//       //   $lte: user.preferences.ageRange.max
+//       // },
+//       age: {
+//         $gte: filters.ageRange.min,
+//         $lte: filters.ageRange.max,
+//       },
+//       city: filters.city,
+
+//       isActive: true,
+//       lastActive: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, // Active in last 7 days
+//     });
+
+//     let randomMatch: any;
+//     let isAIMatch = false;
+
+//     if (potentialMatches.length > 0) {
+//       // Found real users - use them!
+//       randomMatch = potentialMatches[Math.floor(Math.random() * potentialMatches.length)];
+//       console.log(`✅ Matched with REAL user: ${randomMatch.name}`);
+//     } else {
+//       // STEP 2: No real users available - use AI persona as fallback
+//       console.log('⚠️  No real users available. Using AI persona as fallback...');
+      
+//       // Get already matched AI personas to avoid duplicates
+//       const matchedPersonaIds = (user.matchedUsers || []).filter((id: any) => 
+//         isAIPersonaId(id.toString())
+//       ).map((id: any) => id.toString());
+
+//       const aiPersona = getRandomPersona(
+//         user.preferences.showMe,
+//         user.preferences.ageRange,
+//         matchedPersonaIds
+//       );
+
+//       if (!aiPersona) {
+//         return sendError(res, 'No matches available. Try adjusting your preferences.', 404);
+//       }
+
+//       // Create a virtual user object from AI persona
+//       randomMatch = {
+//         _id: aiPersona.id, // Use AI persona ID (starts with 'ai_')
+//         name: aiPersona.name,
+//         age: aiPersona.age,
+//         gender: aiPersona.gender,
+//         city: aiPersona.city,
+//         bio: aiPersona.bio,
+//         interests: aiPersona.interests,
+//         photos: aiPersona.photos
+//       };
+
+//       isAIMatch = true;
+//       console.log(`🤖 Matched with AI persona: ${aiPersona.name} (${aiPersona.id})`);
+//     }
+
+//     // Normalize user order (always put smaller ID first to prevent race conditions)
+//     let normalizedUser1, normalizedUser2;
+//     if (!isAIMatch) {
+//       // For real users, sort by ID to ensure consistency
+//       const ids = [userId, randomMatch._id.toString()].sort();
+//       normalizedUser1 = ids[0];
+//       normalizedUser2 = ids[1];
+//       console.log(`🔍 Checking for match (normalized): ${normalizedUser1} <-> ${normalizedUser2}`);
+//     } else {
+//       // For AI matches, user is always first
+//       normalizedUser1 = userId;
+//       normalizedUser2 = randomMatch._id;
+//     }
+
+//     // Check if match already exists
+//     let match;
+//     if (!isAIMatch) {
+//       match = await Match.findOne({
+//         user1Id: normalizedUser1,
+//         user2Id: normalizedUser2,
+//         status: { $ne: 'skipped' }
+//       });
+      
+//       if (match) {
+//         console.log(`✓ Found existing match: ${match._id}`);
+//       } else {
+//         console.log(`✗ No existing match found, will create new one`);
+//       }
+//     }
+
+//     // If match doesn't exist, create it
+//     if (!match) {
+//       match = await Match.create({
+//         user1Id: normalizedUser1,
+//         user2Id: normalizedUser2,
+//         status: 'active',
+//         revealStatus: {
+//           user1Requested: false,
+//           user2Requested: false,
+//           isRevealed: false
+//         }
+//       });
+//       console.log(`✅ Created new match: ${match._id}`);
+//     } else {
+//       console.log(`♻️ Match already exists: ${match._id}`);
+//     }
+
+//     // Update user's matched users (avoid duplicates)
+//     if (!user.matchedUsers) {
+//       user.matchedUsers = [];
+//     }
+//     if (!user.matchedUsers.includes(randomMatch._id)) {
+//       user.matchedUsers.push(randomMatch._id);
+//       await user.save();
+//     }
+
+//     // Deduct credit
+//     await deductCredits(userId, 'find_match', 1, (match._id as mongoose.Types.ObjectId).toString());
+
+//     // Create anonymous profile for response
+//     // SECURITY: Use server-side blurred image URLs to prevent DOM inspection bypass
+//     // The blurred URLs contain Cloudinary transformations that cannot be removed by users
+//     const anonymousProfile = {
+//       _id: randomMatch._id,
+//       matchId: match._id,
+//       maskedName: maskName(randomMatch.name),
+//       age: randomMatch.age,
+//       blurredPhotos: getBlurredImageUrls(randomMatch.photos || []),
+//       bio: randomMatch.bio,
+//       interests: randomMatch.interests,
+//       city: randomMatch.city,
+//       distance: 5, // Simplified for MVP
+//       isAnonymous: true
+//     };
+
+//     return sendSuccess(res, anonymousProfile, 'Match found!', 201);
+//   } catch (error: any) {
+//     return sendServerError(res, error);
+//   }
+// };
+
 export const findMatch = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
     const user = await User.findById(userId);
+    const { filters } = req.body;
+    console.log(filters);
 
     if (!user) {
-      return sendError(res, 'User not found', 404);
+      return sendError(res, "User not found", 404);
     }
 
     // Check credits
     if (user.credits < 1) {
-      return sendError(res, 'Insufficient credits', 400);
+      return sendError(res, "Insufficient credits", 400);
     }
 
     // STEP 1: Try to find REAL users first
     // Filter out AI persona IDs from matched/skipped users (only use real user ObjectIds)
-    const realMatchedUsers = (user.matchedUsers || []).filter((id: any) => !isAIPersonaId(id.toString()));
-    const realSkippedUsers = (user.skippedUsers || []).filter((id: any) => !isAIPersonaId(id.toString()));
-    
+    const realMatchedUsers = (user.matchedUsers || []).filter(
+      (id: any) => !isAIPersonaId(id.toString()),
+    );
+    const realSkippedUsers = (user.skippedUsers || []).filter(
+      (id: any) => !isAIPersonaId(id.toString()),
+    );
+
     // Check if user has preferences set
     if (!user.preferences) {
-      return sendError(res, 'User preferences not set. Please complete your profile.', 400);
+      return sendError(
+        res,
+        "User preferences not set. Please complete your profile.",
+        400,
+      );
     }
-    
+
+    // Helper function to convert height to total inches
+    const heightToTotalInches = (
+      feet: string | number,
+      inches: string | number,
+    ): number => {
+      const feetNum = typeof feet === "string" ? parseInt(feet) || 0 : feet;
+      const inchesNum =
+        typeof inches === "string" ? parseInt(inches) || 0 : inches;
+      return feetNum * 12 + inchesNum;
+    };
+
+    // Calculate min and max height in total inches from filters
+    const minHeightInches = heightToTotalInches(
+      filters.heightRange.min.feet,
+      filters.heightRange.min.inches,
+    );
+    const maxHeightInches = heightToTotalInches(
+      filters.heightRange.max.feet,
+      filters.heightRange.max.inches,
+    );
+
     const potentialMatches = await User.find({
-      _id: { 
+      _id: {
         $ne: userId,
-        $nin: [...realMatchedUsers, ...realSkippedUsers]
+        $nin: [...realMatchedUsers, ...realSkippedUsers],
       },
-      gender: { $in: user.preferences.showMe },
-      age: { 
-        $gte: user.preferences.ageRange.min,
-        $lte: user.preferences.ageRange.max
+      gender: { $in: filters.gender },
+      age: {
+        $gte: filters.ageRange.min,
+        $lte: filters.ageRange.max,
       },
-      city: user.city,
+      city: filters.city,
       isActive: true,
-      lastActive: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } // Active in last 7 days
+      lastActive: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, // Active in last 7 days
+    });
+
+    // Filter by height range (since height is stored as strings in DB)
+    const heightFilteredMatches = potentialMatches.filter((match) => {
+      // Handle cases where height might be missing or invalid
+      if (!match.heightFeet || !match.heightInches) {
+        return false; // Skip users without height data
+      }
+
+      const matchHeightInches = heightToTotalInches(
+        match.heightFeet,
+        match.heightInches,
+      );
+
+      return (
+        matchHeightInches >= minHeightInches &&
+        matchHeightInches <= maxHeightInches
+      );
     });
 
     let randomMatch: any;
     let isAIMatch = false;
 
-    if (potentialMatches.length > 0) {
+    if (heightFilteredMatches.length > 0) {
       // Found real users - use them!
-      randomMatch = potentialMatches[Math.floor(Math.random() * potentialMatches.length)];
-      console.log(`✅ Matched with REAL user: ${randomMatch.name}`);
+      randomMatch =
+        heightFilteredMatches[
+          Math.floor(Math.random() * heightFilteredMatches.length)
+        ];
+      console.log(
+        `✅ Matched with REAL user: ${randomMatch.name} (Height: ${randomMatch.heightFeet}'${randomMatch.heightInches}")`,
+      );
     } else {
       // STEP 2: No real users available - use AI persona as fallback
-      console.log('⚠️  No real users available. Using AI persona as fallback...');
-      
-      // Get already matched AI personas to avoid duplicates
-      const matchedPersonaIds = (user.matchedUsers || []).filter((id: any) => 
-        isAIPersonaId(id.toString())
-      ).map((id: any) => id.toString());
+      console.log(
+        "⚠️  No real users available with matching filters. Using AI persona as fallback...",
+      );
 
+      // Get already matched AI personas to avoid duplicates
+      const matchedPersonaIds = (user.matchedUsers || [])
+        .filter((id: any) => isAIPersonaId(id.toString()))
+        .map((id: any) => id.toString());
+
+      // AI personas are RANDOM - no filters applied
       const aiPersona = getRandomPersona(
         user.preferences.showMe,
         user.preferences.ageRange,
-        matchedPersonaIds
+        matchedPersonaIds,
       );
 
       if (!aiPersona) {
-        return sendError(res, 'No matches available. Try adjusting your preferences.', 404);
+        return sendError(
+          res,
+          "No matches available. Try adjusting your preferences.",
+          404,
+        );
       }
 
       // Create a virtual user object from AI persona
@@ -116,11 +349,13 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
         city: aiPersona.city,
         bio: aiPersona.bio,
         interests: aiPersona.interests,
-        photos: aiPersona.photos
+        photos: aiPersona.photos,
       };
 
       isAIMatch = true;
-      console.log(`🤖 Matched with AI persona: ${aiPersona.name} (${aiPersona.id})`);
+      console.log(
+        `🤖 Matched with AI persona: ${aiPersona.name} (${aiPersona.id}) - Random selection, no filters applied`,
+      );
     }
 
     // Normalize user order (always put smaller ID first to prevent race conditions)
@@ -130,7 +365,9 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
       const ids = [userId, randomMatch._id.toString()].sort();
       normalizedUser1 = ids[0];
       normalizedUser2 = ids[1];
-      console.log(`🔍 Checking for match (normalized): ${normalizedUser1} <-> ${normalizedUser2}`);
+      console.log(
+        `🔍 Checking for match (normalized): ${normalizedUser1} <-> ${normalizedUser2}`,
+      );
     } else {
       // For AI matches, user is always first
       normalizedUser1 = userId;
@@ -143,9 +380,9 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
       match = await Match.findOne({
         user1Id: normalizedUser1,
         user2Id: normalizedUser2,
-        status: { $ne: 'skipped' }
+        status: { $ne: "skipped" },
       });
-      
+
       if (match) {
         console.log(`✓ Found existing match: ${match._id}`);
       } else {
@@ -158,12 +395,12 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
       match = await Match.create({
         user1Id: normalizedUser1,
         user2Id: normalizedUser2,
-        status: 'active',
+        status: "active",
         revealStatus: {
           user1Requested: false,
           user2Requested: false,
-          isRevealed: false
-        }
+          isRevealed: false,
+        },
       });
       console.log(`✅ Created new match: ${match._id}`);
     } else {
@@ -180,7 +417,12 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
     }
 
     // Deduct credit
-    await deductCredits(userId, 'find_match', 1, (match._id as mongoose.Types.ObjectId).toString());
+    await deductCredits(
+      userId,
+      "find_match",
+      1,
+      (match._id as mongoose.Types.ObjectId).toString(),
+    );
 
     // Create anonymous profile for response
     // SECURITY: Use server-side blurred image URLs to prevent DOM inspection bypass
@@ -195,10 +437,10 @@ export const findMatch = async (req: AuthRequest, res: Response) => {
       interests: randomMatch.interests,
       city: randomMatch.city,
       distance: 5, // Simplified for MVP
-      isAnonymous: true
+      isAnonymous: true,
     };
 
-    return sendSuccess(res, anonymousProfile, 'Match found!', 201);
+    return sendSuccess(res, anonymousProfile, "Match found!", 201);
   } catch (error: any) {
     return sendServerError(res, error);
   }

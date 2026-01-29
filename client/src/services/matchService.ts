@@ -1,8 +1,9 @@
+import type { Filters } from '../pages/Home';
 import api from './api';
 
 export const matchService = {
-  findMatch: async () => {
-    const response = await api.post('/matches/find');
+  findMatch: async (filters: Filters) => {
+    const response = await api.post('/matches/find', { filters });
     return response.data;
   },
 

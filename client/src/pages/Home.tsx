@@ -17,15 +17,25 @@ import {
   Lock,
   Check,
   Loader2,
-  Clock,
+  SlidersHorizontal,
 } from "lucide-react";
 import Logo from "../components/common/Logo";
+
+export interface Filters {
+  gender: string[];
+  ageRange: { min: number; max: number };
+  heightRange: {
+    min: { feet: number; inches: number };
+    max: { feet: number; inches: number };
+  };
+  city: string;
+}
 
 export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { user: reduxUser, isAuthenticated: reduxAuthenticated } = useSelector(
-    (state: RootState) => state.auth
+    (state: RootState) => state.auth,
   );
 
   useEffect(() => {
@@ -40,6 +50,20 @@ export default function Home() {
   const [showOutOfCredits, setShowOutOfCredits] = useState(false);
   const [pendingRevealRequests, setPendingRevealRequests] = useState<any[]>([]);
   const [showMatchingModal, setShowMatchingModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
+
+  // Filter state
+  const [filters, setFilters] = useState<Filters>({
+    gender: ["male", "female", "others"],
+    ageRange: { min: 18, max: 50 },
+    heightRange: {
+      min: { feet: 4, inches: 0 }, // 4'0"
+      max: { feet: 7, inches: 0 }, // 7'0"
+    },
+    city: "Gurgaon",
+  });
+
+  const [tempFilters, setTempFilters] = useState<Filters>(filters);
 
   useEffect(() => {
     fetchCredits();
@@ -100,7 +124,8 @@ export default function Home() {
 
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      const result = await matchService.findMatch();
+      // Pass filters to the match service
+      const result = await matchService.findMatch(filters);
 
       if (result.success) {
         setCurrentMatch(result.data);
@@ -125,7 +150,7 @@ export default function Home() {
 
     if (
       !confirm(
-        "Skip this match? You will lose 1 credit and won't see this profile again."
+        "Skip this match? You will lose 1 credit and won't see this profile again.",
       )
     ) {
       return;
@@ -155,7 +180,7 @@ export default function Home() {
 
     if (
       !confirm(
-        `Request to reveal profiles? This costs ${CREDIT_COSTS.REQUEST_REVEAL} credits. Both must accept to reveal.`
+        `Request to reveal profiles? This costs ${CREDIT_COSTS.REQUEST_REVEAL} credits. Both must accept to reveal.`,
       )
     ) {
       return;
@@ -165,7 +190,7 @@ export default function Home() {
       await matchService.requestReveal(currentMatch.matchId);
       setCredits(credits - CREDIT_COSTS.REQUEST_REVEAL);
       alert(
-        "Reveal request sent! You can chat while waiting for their response."
+        "Reveal request sent! You can chat while waiting for their response.",
       );
     } catch (error: any) {
       alert(error.response?.data?.error || "Failed to request reveal");
@@ -202,7 +227,7 @@ export default function Home() {
   const handleRejectReveal = async (matchId: string) => {
     if (
       !confirm(
-        "Decline this reveal request? You can still chat, but profiles will stay anonymous."
+        "Decline this reveal request? You can still chat, but profiles will stay anonymous.",
       )
     ) {
       return;
@@ -214,6 +239,80 @@ export default function Home() {
     } catch (error: any) {
       console.error("Error rejecting reveal:", error);
     }
+  };
+
+  // Filter handlers
+  const toggleGender = (gender: string) => {
+    setTempFilters((prev) => ({
+      ...prev,
+      gender: prev.gender.includes(gender)
+        ? prev.gender.filter((g) => g !== gender)
+        : [...prev.gender, gender],
+    }));
+  };
+
+  // Helper functions to convert between total inches and feet/inches
+  const heightToTotalInches = (feet: number, inches: number): number => {
+    return feet * 12 + inches;
+  };
+
+  const totalInchesToHeight = (
+    totalInches: number,
+  ): { feet: number; inches: number } => {
+    const feet = Math.floor(totalInches / 12);
+    const inches = totalInches % 12;
+    return { feet, inches };
+  };
+
+  const applyFilters = () => {
+    setFilters(tempFilters);
+    setShowFilterModal(false);
+    // Reset current match when filters change
+    setCurrentMatch(null);
+  };
+
+  const resetFilters = () => {
+    const defaultFilters: Filters = {
+      gender: ["male", "female", "others"],
+      ageRange: { min: 18, max: 50 },
+      heightRange: {
+        min: { feet: 4, inches: 0 },
+        max: { feet: 7, inches: 0 },
+      },
+      city: "Gurgaon",
+    };
+    setTempFilters(defaultFilters);
+  };
+
+  // Check if filters are different from default
+  const areFiltersApplied = () => {
+    const defaultFilters: Filters = {
+      gender: ["male", "female", "others"],
+      ageRange: { min: 18, max: 50 },
+      heightRange: {
+        min: { feet: 4, inches: 0 },
+        max: { feet: 7, inches: 0 },
+      },
+      city: "Gurgaon",
+    };
+
+    return (
+      JSON.stringify(filters.gender.sort()) !==
+        JSON.stringify(defaultFilters.gender.sort()) ||
+      filters.ageRange.min !== defaultFilters.ageRange.min ||
+      filters.ageRange.max !== defaultFilters.ageRange.max ||
+      filters.heightRange.min.feet !== defaultFilters.heightRange.min.feet ||
+      filters.heightRange.min.inches !==
+        defaultFilters.heightRange.min.inches ||
+      filters.heightRange.max.feet !== defaultFilters.heightRange.max.feet ||
+      filters.heightRange.max.inches !==
+        defaultFilters.heightRange.max.inches ||
+      filters.city.trim() !== defaultFilters.city
+    );
+  };
+
+  const formatHeight = (feet: number, inches: number) => {
+    return `${feet}'${inches}"`;
   };
 
   const renderMatch = () => {
@@ -325,51 +424,6 @@ export default function Home() {
             </div>
           )}
 
-          {/* Action Buttons */}
-          {/* {!isRevealed && (
-            <div className="flex gap-3">
-              <button
-                onClick={handleSkip}
-                className="w-full px-6 py-3.5 
-                      bg-white/5 border-2 border-[#C5B4E3]/30 text-[#C5B4E3] 
-                      rounded-xl font-semibold 
-                      hover:bg-[#C5B4E3]/10 hover:border-[#C5B4E3]/50 
-                      transition-all 
-                      flex items-center justify-center gap-2
-                      text-base"
-              >
-                <X className="w-5 h-5" />
-                Skip (1 credit)
-              </button>
-
-              <button
-                onClick={handleRequestReveal}
-                disabled={alreadyRequested}
-                className={`w-full px-6 py-3.5 
-                          rounded-xl font-semibold transition-all 
-                          shadow-sm flex items-center justify-center gap-2
-                          text-base 
-                          ${
-                            alreadyRequested
-                              ? "bg-white/5 text-white/30 cursor-not-allowed border border-white/10"
-                              : "bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] hover:from-[#B5A3D3] hover:to-[#A593C3] shadow-md"
-                          }`}
-              >
-                {alreadyRequested ? (
-                  <>
-                    <Clock className="w-5 h-5" />
-                    Request Sent
-                  </>
-                ) : (
-                  <>
-                    <Heart className="w-5 h-5" />
-                    Reveal (1 credit)
-                  </>
-                )}
-              </button>
-            </div>
-          )} */}
-
           <button
             onClick={() => navigate(`/chat/${currentMatch.matchId}`)}
             className="w-full px-6 py-4 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-lg"
@@ -403,13 +457,7 @@ export default function Home() {
       {/* Header */}
       <div className="fixed w-full z-50 bg-[#0A0A0F]/95 backdrop-blur-xl border-b border-white/10 shadow-sm top-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-          {/* <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#C5B4E3] to-[#B5A3D3] rounded-lg flex items-center justify-center shadow-sm">
-              <span className="text-xl text-[#0A0A0F] font-bold">S</span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">START</h1>
-          </div> */}
-          <Logo/>
+          <Logo />
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="bg-[#C5B4E3]/20 px-4 py-2 rounded-lg flex items-center gap-2 font-semibold border border-[#C5B4E3]/30">
               <Sparkles className="w-4 h-4 text-[#C5B4E3]" />
@@ -490,6 +538,23 @@ export default function Home() {
             <p className="text-white/60 text-lg mb-8">
               Click below to discover someone special
             </p>
+
+            {/* Filter Button */}
+            <button
+              onClick={() => {
+                setTempFilters(filters);
+                setShowFilterModal(true);
+              }}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all mb-6 flex items-center gap-2 mx-auto ${
+                areFiltersApplied()
+                  ? "bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] shadow-md hover:from-[#B5A3D3] hover:to-[#A593C3]"
+                  : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+              }`}
+            >
+              <SlidersHorizontal className="w-5 h-5" />
+              {areFiltersApplied() ? "Filters Applied" : "Filters"}
+            </button>
+
             <button
               onClick={() => handleFindMatch()}
               disabled={loading || credits < CREDIT_COSTS.FIND_MATCH}
@@ -543,6 +608,224 @@ export default function Home() {
           renderMatch()
         )}
       </div>
+
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60] animate-in fade-in duration-300">
+          <div className="bg-[#15151F] backdrop-blur-xl rounded-3xl w-full max-w-lg shadow-2xl animate-in zoom-in duration-300 border border-white/10 flex flex-col max-h-[85vh] sm:max-h-[90vh] my-auto">
+            {/* Fixed Header */}
+            <div className="flex justify-between items-center p-6 sm:p-8 pb-4 border-b border-white/10 flex-shrink-0">
+              <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+                <SlidersHorizontal className="w-5 h-5 sm:w-6 sm:h-6 text-[#C5B4E3]" />
+                Filters
+              </h2>
+              <button
+                onClick={() => setShowFilterModal(false)}
+                className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center text-white hover:bg-white/10 transition border border-white/10 flex-shrink-0"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto flex-1 px-6 sm:px-8 py-4 custom-scrollbar">
+              <div className="space-y-6">
+                {/* Gender */}
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-white/70 mb-3 uppercase tracking-wider">
+                    Gender
+                  </h3>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {["male", "female", "others"].map((gender) => (
+                      <button
+                        key={gender}
+                        onClick={() => toggleGender(gender)}
+                        className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-all text-sm sm:text-base ${
+                          tempFilters.gender.includes(gender)
+                            ? "bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F]"
+                            : "bg-white/5 text-white/60 border border-white/10 hover:bg-white/10"
+                        }`}
+                      >
+                        {gender.charAt(0).toUpperCase() + gender.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Age Range */}
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-white/70 mb-3 uppercase tracking-wider">
+                    Age Range
+                  </h3>
+                  <div className="bg-white/5 rounded-2xl p-4 sm:p-5 border border-white/10">
+                    <div className="flex justify-between mb-3">
+                      <span className="text-white/60 text-sm">Min Age</span>
+                      <span className="text-[#C5B4E3] font-bold">
+                        {tempFilters.ageRange.min}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="18"
+                      max="50"
+                      value={tempFilters.ageRange.min}
+                      onChange={(e) =>
+                        setTempFilters({
+                          ...tempFilters,
+                          ageRange: {
+                            ...tempFilters.ageRange,
+                            min: parseInt(e.target.value),
+                          },
+                        })
+                      }
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
+                    />
+                    <div className="flex justify-between mt-4 mb-3">
+                      <span className="text-white/60 text-sm">Max Age</span>
+                      <span className="text-[#C5B4E3] font-bold">
+                        {tempFilters.ageRange.max}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="18"
+                      max="50"
+                      value={tempFilters.ageRange.max}
+                      onChange={(e) =>
+                        setTempFilters({
+                          ...tempFilters,
+                          ageRange: {
+                            ...tempFilters.ageRange,
+                            max: parseInt(e.target.value),
+                          },
+                        })
+                      }
+                      className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
+                    />
+                  </div>
+                </div>
+
+                {/* Height Range */}
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-white/70 mb-3 uppercase tracking-wider">
+                    Height Range
+                  </h3>
+                  <div className="bg-white/5 rounded-2xl p-4 sm:p-5 border border-white/10 space-y-5">
+                    {/* Min Height */}
+                    <div>
+                      <div className="flex justify-between mb-3">
+                        <span className="text-white/60 text-sm">
+                          Min Height
+                        </span>
+                        <span className="text-[#C5B4E3] font-bold">
+                          {formatHeight(
+                            tempFilters.heightRange.min.feet,
+                            tempFilters.heightRange.min.inches,
+                          )}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={heightToTotalInches(4, 0)} // 4'0" = 48 inches
+                        max={heightToTotalInches(7, 0)} // 7'0" = 84 inches
+                        value={heightToTotalInches(
+                          tempFilters.heightRange.min.feet,
+                          tempFilters.heightRange.min.inches,
+                        )}
+                        onChange={(e) => {
+                          const totalInches = parseInt(e.target.value);
+                          const height = totalInchesToHeight(totalInches);
+                          setTempFilters({
+                            ...tempFilters,
+                            heightRange: {
+                              ...tempFilters.heightRange,
+                              min: height,
+                            },
+                          });
+                        }}
+                        className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
+                      />
+                    </div>
+
+                    {/* Max Height */}
+                    <div>
+                      <div className="flex justify-between mb-3">
+                        <span className="text-white/60 text-sm">
+                          Max Height
+                        </span>
+                        <span className="text-[#C5B4E3] font-bold">
+                          {formatHeight(
+                            tempFilters.heightRange.max.feet,
+                            tempFilters.heightRange.max.inches,
+                          )}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={heightToTotalInches(4, 0)} // 4'0" = 48 inches
+                        max={heightToTotalInches(7, 0)} // 7'0" = 84 inches
+                        value={heightToTotalInches(
+                          tempFilters.heightRange.max.feet,
+                          tempFilters.heightRange.max.inches,
+                        )}
+                        onChange={(e) => {
+                          const totalInches = parseInt(e.target.value);
+                          const height = totalInchesToHeight(totalInches);
+                          setTempFilters({
+                            ...tempFilters,
+                            heightRange: {
+                              ...tempFilters.heightRange,
+                              max: height,
+                            },
+                          });
+                        }}
+                        className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer slider"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* City */}
+                <div>
+                  <h3 className="text-xs sm:text-sm font-bold text-white/70 mb-3 uppercase tracking-wider">
+                    City
+                  </h3>
+                  <input
+                    type="text"
+                    value={tempFilters.city}
+                    onChange={(e) =>
+                      setTempFilters({
+                        ...tempFilters,
+                        city: e.target.value,
+                      })
+                    }
+                    placeholder="Enter city"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-[#C5B4E3]/50 transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Fixed Footer with Action Buttons */}
+            <div className="p-6 sm:p-8 pt-4 border-t border-white/10 flex-shrink-0 bg-[#15151F]">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={resetFilters}
+                  className="w-full sm:flex-1 px-6 py-3.5 bg-white/5 border border-white/10 text-white rounded-xl font-semibold hover:bg-white/10 transition-all text-sm sm:text-base"
+                >
+                  Reset
+                </button>
+                <button
+                  onClick={applyFilters}
+                  className="w-full sm:flex-1 px-6 py-3.5 bg-gradient-to-r from-[#C5B4E3] to-[#B5A3D3] text-[#0A0A0F] rounded-xl font-semibold hover:from-[#B5A3D3] hover:to-[#A593C3] transition-all shadow-lg text-sm sm:text-base"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Matching Modal */}
       {showMatchingModal && (
@@ -659,7 +942,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Animations */}
+      {/* Animations & Custom Styles */}
       <style>{`
         @keyframes float {
           0%, 100% {
@@ -674,6 +957,62 @@ export default function Home() {
           75% {
             transform: translate(-10px, -5px);
           }
+        }
+
+        /* Custom Range Slider Styles */
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #C5B4E3, #B5A3D3);
+          cursor: pointer;
+          box-shadow: 0 2px 8px rgba(197, 180, 227, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #C5B4E3, #B5A3D3);
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 2px 8px rgba(197, 180, 227, 0.3);
+        }
+
+        .slider::-webkit-slider-runnable-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+        }
+
+        .slider::-moz-range-track {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+        }
+
+        /* Custom Scrollbar Styles */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: linear-gradient(135deg, #C5B4E3, #B5A3D3);
+          border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(135deg, #B5A3D3, #A593C3);
+        }
+
+        /* Firefox scrollbar */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #C5B4E3 rgba(255, 255, 255, 0.05);
         }
       `}</style>
     </div>
